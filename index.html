@@ -1,343 +1,724 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Speaking Practice" />
-  <title>Speaking Practice</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <meta name="apple-mobile-web-app-title" content="Phrase Typing" />
+  <title>Phrase Typing Practice</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Nunito',sans-serif;background:#0f172a;display:flex;justify-content:center;min-height:100vh;-webkit-tap-highlight-color:transparent;}
-    .shell{width:100%;max-width:430px;min-height:100vh;background:#f8fafc;display:flex;flex-direction:column;}
-    .page{flex:1;padding:16px 16px 40px;display:flex;flex-direction:column;gap:12px;}
-    .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0;}
-    .stat-card{background:white;border-radius:16px;padding:14px 10px;text-align:center;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
-    .ghost-btn{background:none;border:2px dashed #cbd5e0;border-radius:14px;color:#94a3b8;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:12px;width:100%;cursor:pointer;margin-top:4px;}
-    .fc-card{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);border-radius:24px;min-height:260px;padding:28px 22px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.2);flex:1;}
-    .fc-front{display:flex;flex-direction:column;align-items:center;text-align:center;}
-    .fc-num{font-size:11px;color:#6366f1;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
-    .fc-title{font-size:22px;font-weight:800;color:white;line-height:1.3;}
-    .fc-hint{font-size:13px;color:#64748b;margin-top:24px;}
-    .fc-back{display:flex;flex-direction:column;}
-    .fc-text{font-size:14px;line-height:1.85;color:#e2e8f0;font-weight:600;}
-    .tts-row{display:flex;gap:8px;}
-    .tts-btn{flex:1;padding:12px 6px;border-radius:14px;border:2px solid #e2e8f0;background:white;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:#4a5568;cursor:pointer;}
-    .tts-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:white;flex:2;}
-    .tts-stop{border-color:#fecaca;color:#dc2626;background:#fff5f5;flex:0.6;}
-    .score-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .score-btn{padding:18px;border-radius:18px;border:none;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.12);}
-    .score-btn.good{background:#16a34a;color:white;}
-    .score-btn.bad{background:#dc2626;color:white;}
-    .quiz-q-box{background:white;border-radius:20px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
-    .quiz-q-text{font-size:16px;color:#1e293b;font-weight:700;line-height:1.65;font-style:italic;}
-    .quiz-opt{width:100%;padding:16px 18px;border-radius:16px;border:2px solid #e2e8f0;background:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1e293b;text-align:left;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.05);margin-bottom:10px;display:block;}
-    .quiz-opt.correct{border-color:#16a34a;background:#f0fdf4;color:#14532d;}
-    .quiz-opt.wrong{border-color:#dc2626;background:#fef2f2;color:#7f1d1d;}
-    .quiz-result{border-radius:14px;padding:14px 18px;font-size:15px;font-weight:800;text-align:center;margin-bottom:10px;}
-    .quiz-result.ok{background:#f0fdf4;color:#15803d;}
-    .quiz-result.ng{background:#fef2f2;color:#991b1b;}
-    .next-btn{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:18px;padding:18px;width:100%;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,0.4);}
-    .pct-circle{width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 8px 24px rgba(99,102,241,0.4);}
-    .speed-btn{flex:1;padding:8px 0;border-radius:10px;border:2px solid #e2e8f0;background:white;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:#64748b;cursor:pointer;}
-    .speed-btn.active{border-color:#6366f1;background:#6366f1;color:white;}
-    .topbar-fill{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:6px;transition:width 0.4s ease;}
+    body{font-family:'Nunito',sans-serif;background:#0f172a;min-height:100vh;display:flex;justify-content:center;}
+    .shell{width:100%;max-width:430px;min-height:100vh;background:#f1f5f9;display:flex;flex-direction:column;}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useCallback, useRef } = React;
-
-const topics = [
-  { id: 1, title: "Hobby (Photography)", text: "I'm really into photography. I've been doing this for about five years now. What I love about it is that it helps me see the world differently. I notice small details like light and shadows that I never paid attention to before. Taking photos is also a great way to keep memories of special moments. It's both creative and relaxing for me." },
-  { id: 2, title: "Education", text: "I believe that the main purpose of education is to teach people how to think for themselves. In today's world, information is everywhere, so it's more important to know how to evaluate it than just to memorize facts. Education should also help students become responsible members of society. When people can think critically, they can make better decisions in their lives." },
-  { id: 3, title: "A Person Who Inspires You", text: "The person who inspires me most is my late father. What made him special was that he worked very hard but was always kind to everyone. He treated all people with respect, whether they were rich or poor. He taught me that success isn't just about your job - it's also about how you treat others. His example shows that you can be both hardworking and caring at the same time." },
-  { id: 4, title: "Environmental Issue", text: "I'm concerned about air pollution, especially in big cities. This affects people's health and can cause breathing problems. We can help by using public transportation or riding bicycles instead of driving cars. Planting more trees in cities is also helpful. The government should make stricter rules for factories and invest more in clean energy. Both individuals and governments need to work together on this." },
-  { id: 5, title: "Cultural Custom (New Year)", text: "One important tradition in my country is New Year's Day, or Oshougatsu. We celebrate by cleaning our houses before the new year and preparing special foods called osechi. Each dish has a special meaning - for example, black beans represent health. On New Year's Day, families gather to eat together and visit shrines. This custom is meaningful because it brings families together and gives us time to think about the past year and our hopes for the future." },
-  { id: 6, title: "Favorite Holiday", text: "My favorite holiday is New Year's Day. What makes it special is that it's a time for both celebration and reflection. I enjoy going to my mother's house with my family because we can spend quality time together. It gives me a chance to think about what I did last year and set goals for the new year. The combination of family, traditional food, and looking forward to the future makes it my favorite holiday." },
-  { id: 7, title: "Friendship", text: "Friendship is important to me because true friends give honest advice, even when it's hard to hear. They help me see things from different perspectives when I face problems. I can be myself around them without worrying about being judged. Good friends also support me when I'm going through difficult times and celebrate with me when things go well. Having people who truly understand you makes life much better." },
-  { id: 8, title: "Public Transportation vs. Driving", text: "There are advantages and disadvantages to both options. On one hand, public transportation is cheaper and better for the environment. You don't have to pay for gas, parking, or car maintenance. On the other hand, cars give you more freedom. You can go anywhere at any time without waiting for buses or trains. The main benefit of driving is convenience, but the downside is the cost and environmental impact. I think the best choice depends on where you live and what you need." },
-  { id: 9, title: "Favorite Weather", text: "I prefer sunny weather because it makes me feel positive and energetic. When it's sunny, I can go for walks, take photos outside, or just enjoy my morning coffee on the balcony. Sunny weather puts me in a good mood and helps me be more productive. I also feel more motivated to exercise and spend time outdoors. Of course, I appreciate other types of weather too, but nothing beats a clear, sunny day for me." },
-  { id: 10, title: "Dream Travel Destination", text: "If I could travel anywhere, I would go to Italy. I've always wanted to try authentic Italian food in its home country - not just pizza, but regional dishes from different areas. What attracts me most is the combination of food, history, and beautiful architecture. I'd love to experience places like Rome and Florence, where you can see ancient buildings and world-famous art. Italian culture also seems to value enjoying life, which I find appealing." },
-  { id: 11, title: "Favorite Technology", text: "The technology I use most is my smartphone. It has changed my life by making communication so much easier. I can stay in touch with friends and family through messages and video calls. It also allows me to access information instantly - I can look up anything I need to know in seconds. I can't imagine living without it now. However, I try to be careful not to spend too much time looking at the screen." },
-  { id: 12, title: "Historical Figure (Helen Keller)", text: "I admire Helen Keller because she overcame incredible challenges. Despite losing both her sight and hearing as a young child, she learned to communicate and became a famous writer and speaker. Her story teaches us that our limitations don't define what we can achieve. With determination and the right support, people can accomplish amazing things. She also spent her life helping others with disabilities, which makes her even more inspiring." },
-  { id: 13, title: "Impactful Movie (Toy Story)", text: "A movie that really affected me was Toy Story. It's an animated film, but it has deep messages about friendship and loyalty. The message I took from it was that true friendship means accepting others and putting their needs alongside your own. I was moved by how the characters support each other through difficult times. It made me realize that good relationships require effort and understanding. Even though it's a children's movie, I think adults can learn a lot from it too." },
-  { id: 14, title: "Skill to Learn (Medicinal Cooking)", text: "I'd like to learn medicinal cooking, which means using food to support health. I'm interested in this because food affects our bodies in many ways. This skill would help me take better care of my family by preparing meals that are both delicious and healthy. It would allow me to understand which foods are good for different conditions - like what to eat when you have a cold or feel tired. I think this knowledge could really improve our daily lives." },
-  { id: 15, title: "Challenging Situation", text: "One of the most difficult times was when I got seriously ill last year. I had to stay in bed for a long time, which gave me time to think about my life. It made me realize that I had some regrets about not studying harder when I was younger. I learned from this experience that we shouldn't wait to do important things. After that, I decided to start taking online courses. The illness was hard, but it helped me understand what really matters to me." },
-  { id: 16, title: "Passion for Reading", text: "I'm passionate about reading books. Reading helps me learn new things and understand different perspectives. Through books, I can experience stories and ideas from around the world without leaving my home. I try to read a variety of genres - both fiction and non-fiction - to keep learning and growing. Fiction develops my imagination and empathy, while non-fiction teaches me practical knowledge. It's a hobby that never gets boring because there's always something new to discover." },
-  { id: 17, title: "Work Experience Lesson", text: "Through my work experience, I learned that being punctual and polite is extremely important. At first, I thought these were just basic rules. But I realized that arriving on time shows respect for other people's time. Being polite creates a positive working environment and builds trust with colleagues. This has helped me in my career because people see me as reliable. I've noticed that workers with good manners often get more opportunities than those who don't, even if their skills are similar." },
-  { id: 18, title: "Favorite Dish (Ramen)", text: "My favorite dish is ramen. It consists of noodles in a rich broth, usually with sliced pork, egg, and green onions. What makes it special is that the broth takes many hours to prepare - some restaurants cook it for over 12 hours. It reminds me of good times with friends after school or work, sitting in a warm restaurant on a cold day. The taste is comforting, and each region of Japan has its own style. For me, ramen is not just food - it's connected to happy memories." },
-  { id: 19, title: "Inspiring Book/Movie (Harry Potter)", text: "Harry Potter has influenced me greatly. The main lesson I took from it was that courage doesn't mean you're not afraid - it means doing the right thing even when you are scared. The characters in the story often feel fear, but they choose to act anyway. It showed me that everyone can be brave in their own way. I apply this to my own life by trying to face difficult situations instead of avoiding them. This series taught me that our choices matter more than our abilities." },
-  { id: 20, title: "Difficult Decision (University)", text: "One of the hardest decisions I made was choosing my university major. I had to consider many things: what I'm interested in, job opportunities, and my future career. I was torn between following my passion and choosing something practical. In the end, I tried to find a balance between both. Looking back, I think the most important thing is to make a decision and commit to it fully. No choice is perfect, but we can make any path work if we put in the effort." },
-  { id: 21, title: "Learning Languages", text: "Learning a new language is valuable because it opens doors to new cultures and opportunities. When you learn a language, you can better understand how people from that culture think and live. This builds empathy and breaks down barriers between people. In addition, it helps you in your career - many companies need employees who can speak multiple languages. English, in particular, connects people from almost every country. Learning languages also keeps your brain active and improves your memory. It's challenging, but the benefits are worth the effort." },
-  { id: 22, title: "Personal Skill (Cooking)", text: "A skill I'm proud of is cooking. I developed this skill by practicing every day and learning from my mistakes. At first, I just followed recipes, but now I can adjust dishes based on what ingredients I have. I use it daily to prepare healthy meals for my family. It benefits my life by saving money compared to eating out and by giving me control over what we eat. Cooking has become more than just a necessity - it's a way to show care for the people I love and to express creativity." },
-  { id: 23, title: "Favorite Place (Lake Kawaguchi)", text: "My favorite place to visit is Lake Kawaguchi, near Mount Fuji. What I love about it is the incredible view of the mountain reflected in the lake. It's beautiful because the scenery changes with each season - cherry blossoms in spring, colorful leaves in autumn. Going there helps me relax and forget about the stress of daily life. The peaceful atmosphere is very different from the busy city. Walking by the lake and enjoying nature reminds me of what's truly important and gives me energy to face my regular routine again." },
-  { id: 24, title: "Technology in Society", text: "Technology has both benefits and drawbacks. On the positive side, it has made communication easier than ever. We can talk to anyone in the world instantly and access information about almost anything. However, we should be careful about privacy and spending too much time on screens. Many people now have less face-to-face interaction than before, which can affect relationships. The key is to use technology wisely - taking advantage of its benefits while maintaining real human connections and protecting our personal information." },
-  { id: 25, title: "Environmental Conservation", text: "We need to protect the environment for future generations. Simple actions like reducing plastic use and saving water can make a difference. For example, we can bring our own bags when shopping and turn off the tap while brushing our teeth. Both individuals and governments must take responsibility - people should change their habits, and governments should create laws to protect nature. Future generations will benefit if we start taking action now. It's not too late, but we need to act quickly and consistently." },
-  { id: 26, title: "Meeting a Historical Figure (Einstein)", text: "If I could meet anyone from history, I would choose Albert Einstein. I'm curious about how he came up with his revolutionary ideas. I would ask him about his thinking process - how he used imagination together with math and science. I think I could learn a lot from talking to him about creativity and not being afraid to question common beliefs. He also had interesting views on education and life in general. It would be amazing to understand how such a brilliant mind worked." },
-  { id: 27, title: "Personal Achievement (Morning Reading)", text: "An achievement I'm proud of is building a habit of waking up at 4 AM to read English books. It was difficult at first because I'm not naturally a morning person. I succeeded by making some changes to my routine - going to bed earlier and preparing my books the night before. Now it feels natural, and I've improved my English a lot. This taught me that building good habits takes time and requires removing obstacles. You can't just rely on motivation - you need a good system." },
-  { id: 28, title: "Adapting to New Environment", text: "When I moved to a new city, I found it challenging because I didn't know anyone there. At first, I felt lonely and homesick. Everything was unfamiliar, from the streets to the local customs. To adapt, I started talking to my neighbors and joining local groups based on my interests. Slowly, I made friends and the city began to feel like home. This experience taught me that adapting to new situations requires effort - you have to step out of your comfort zone and actively try to connect with people." },
-  { id: 29, title: "Childhood Memory (Beach)", text: "One of my happiest childhood memories is a family trip to the beach. I remember the feeling of warm sand under my feet vividly. We built sandcastles, played in the waves, and had a picnic together. What made it special was not any exciting activity, but simply being together as a family without any rush or worry. When I think about it now, I realize that the best memories aren't about expensive trips or fancy things - they're about spending quality time with people you love." },
-  { id: 30, title: "Fascinating Animal (Dolphins)", text: "An animal that fascinates me is the dolphin. What's amazing about them is their intelligence and social behavior. They are known for living in groups called pods, where they work together and care for each other. Scientists have found that dolphins can recognize themselves in mirrors, which shows they have self-awareness. They also seem to have their own names for each other. Dolphins can solve problems and even appear to play for fun, not just to learn. Their intelligence makes them one of the most interesting animals in the world." },
-  { id: 31, title: "Daily Routine", text: "My typical day starts early - I wake up at 5 AM to have some quiet time before work. I use this time for personal goals like reading or studying. Then I work from 9 to 5, trying to stay focused and productive. After work, I usually do some household tasks and prepare dinner. I try to balance work responsibilities with personal growth activities. Before bed, I like to watch educational videos on YouTube. It's a relaxing way to end the day while still learning something new." },
-  { id: 32, title: "Historical Event (Internet)", text: "One of the most important events in history is the creation of the Internet. It changed society by connecting people all over the world instantly. Before the Internet, people had to go to libraries for information or wait days for letters to arrive. Today, we can find almost any information in seconds and communicate with anyone anywhere. It has transformed business, education, and how we maintain relationships. Of course, it also brought new problems like privacy concerns, but overall, the Internet has made knowledge more accessible to everyone." },
-  { id: 33, title: "School Memory (First Day)", text: "I clearly remember my first day of elementary school. I was nervous because everything was new - the building, the teachers, and all the other children. I didn't know anyone, and I worried about whether I would make friends. What helped me was meeting another nervous student. We were both shy, but somehow that made it easier to talk to each other. We became good friends that day. Looking back, this experience taught me that showing my true feelings can actually help me connect with others who feel the same way." },
-  { id: 34, title: "Favorite Music Genre", text: "My favorite type of music is pop. It makes me feel happy and energetic. The catchy melodies and strong beats always lift my mood. I enjoy listening to it when I'm exercising or doing housework - it makes tasks feel easier and more enjoyable. Music has the power to change how we feel instantly. While I appreciate other genres too, pop music is what I turn to most often. It doesn't require deep concentration to enjoy, which makes it perfect for everyday activities." },
-  { id: 35, title: "Technology Impact (Computer)", text: "The technology that has impacted me most is my computer. I use it for work, learning, and entertainment. It has made accessing information much easier - I can watch tutorial videos, take online courses, and research any topic I'm curious about. Without it, I couldn't do my job effectively or continue my education in the way I do now. The computer has become like a window to the world, connecting me to knowledge and people everywhere. It's amazing how one device can serve so many purposes." },
-  { id: 36, title: "Memorable Dining Experience", text: "A memorable eating experience I had was trying rabbit for the first time in France. I was hesitant at first because in my culture, rabbits are seen more as pets than food. But I decided to try it as part of experiencing French culture. After trying it, I realized it actually tasted quite good - similar to chicken but more tender. This taught me to be more open-minded about food from different cultures. What seems strange to us might be completely normal somewhere else. Traveling and trying new things helps us understand this." },
-  { id: 37, title: "Importance of Communication", text: "Communication is essential because it's how we share ideas, solve problems, and build relationships. Technology has made it easier to stay in touch with people far away through messages and video calls. However, we should remember that face-to-face conversation is still very important. When we meet in person, we can see facial expressions and body language, which helps us understand each other better. Good communication requires both speaking clearly and listening carefully. In today's world, we need to balance online and in-person communication." },
-  { id: 38, title: "School Memory (Friends)", text: "A school memory I treasure is spending time with friends after class. We spent time singing karaoke and walking along the river, talking about our dreams and worries. What made it memorable was the feeling of freedom and connection - we could be ourselves completely without any judgment. We laughed, shared secrets, and supported each other. These moments remind me that simple times with good friends are often the happiest. Now that I'm older and busier, I appreciate those carefree days even more." },
-  { id: 39, title: "Inspiring Book (The Little Prince)", text: "A book that changed my perspective is The Little Prince. Although it's written for children, its messages are very deep. The most important message is that what really matters in life is invisible - things like love, friendship, and the time we invest in relationships. It taught me that a relationship becomes special not because of what someone is, but because of the care and attention we give to them. I often think about this when I'm too focused on work or material things. The book reminds me to treasure the people in my life." },
-  { id: 40, title: "Influential Teacher", text: "A person who influenced me greatly is one of my teachers. He encouraged me to never give up on my dreams, especially when I was going through a hard time. What I learned from him was that our current situation doesn't determine our future - we can always grow and improve with effort. He believed in me even when I didn't believe in myself. Thanks to him, I kept going and eventually found my own path. His faith in me changed how I see my own potential." },
+const{useState,useRef,useEffect}=React;
+const TOPICS=[
+{id:1,title:"Hobby (Photography)",full:"I'm really into photography. I've been doing this for about five years now. What I love about it is that it helps me see the world differently. I notice small details like light and shadows that I never paid attention to before. Taking photos is also a great way to keep memories of special moments. It's both creative and relaxing for me.",steps:[
+{lv:1,ja:"写真撮影",en:"photography"},
+{lv:1,ja:"〜にはまっている",en:"really into"},
+{lv:1,ja:"光と影",en:"light and shadows"},
+{lv:1,ja:"特別な瞬間",en:"special moments"},
+{lv:1,ja:"創造的でリラックスできる",en:"creative and relaxing"},
+{lv:2,ja:"写真撮影にはまっている",en:"I'm really into photography."},
+{lv:2,ja:"5年ほどやっている",en:"I've been doing this for about five years now."},
+{lv:2,ja:"世界を違って見るのを助けてくれる",en:"it helps me see the world differently."},
+{lv:2,ja:"光と影のような小さな細部に気づく",en:"I notice small details like light and shadows"},
+{lv:2,ja:"特別な瞬間の思い出を残すよい方法",en:"a great way to keep memories of special moments"},
+{lv:3,ja:"好きなのは世界を違って見るのを助けてくれること",en:"What I love about it is that it helps me see the world differently."},
+{lv:3,ja:"以前は気にしていなかった光と影のような細部に気づく",en:"I notice small details like light and shadows that I never paid attention to before."},
+{lv:3,ja:"写真を撮ることは特別な瞬間の思い出を残す素晴らしい方法でもある",en:"Taking photos is also a great way to keep memories of special moments."},
+{lv:3,ja:"創造的でもあり、リラックスできる趣味だ",en:"It's both creative and relaxing for me."},
+{lv:4,ja:"最初の2文（写真が好き＋5年やっている）",en:"I'm really into photography. I've been doing this for about five years now."},
+{lv:4,ja:"最後の2文（特別な瞬間＋創造的）",en:"Taking photos is also a great way to keep memories of special moments. It's both creative and relaxing for me."},
+]},
+{id:2,title:"Education",full:"I believe that the main purpose of education is to teach people how to think for themselves. In today's world, information is everywhere, so it's more important to know how to evaluate it than just to memorize facts. Education should also help students become responsible members of society. When people can think critically, they can make better decisions in their lives.",steps:[
+{lv:1,ja:"教育の主な目的",en:"the main purpose of education"},
+{lv:1,ja:"自分で考える",en:"think for themselves"},
+{lv:1,ja:"情報を評価する",en:"evaluate information"},
+{lv:1,ja:"批判的に考える",en:"think critically"},
+{lv:1,ja:"社会の責任ある一員",en:"responsible members of society"},
+{lv:2,ja:"教育の主な目的は自分で考えることを教えること",en:"the main purpose of education is to teach people how to think for themselves."},
+{lv:2,ja:"情報を評価する方法を知ることの方が重要",en:"it's more important to know how to evaluate it than just to memorize facts."},
+{lv:2,ja:"教育は生徒が責任ある社会の一員になるのを助けるべき",en:"Education should also help students become responsible members of society."},
+{lv:3,ja:"教育の主な目的は自分で考える方法を人々に教えること",en:"I believe that the main purpose of education is to teach people how to think for themselves."},
+{lv:3,ja:"情報は至る所にあるので、事実を暗記するより評価する方法を知る方が重要",en:"In today's world, information is everywhere, so it's more important to know how to evaluate it than just to memorize facts."},
+{lv:3,ja:"批判的に考えられる人は、生活でよりよい決断ができる",en:"When people can think critically, they can make better decisions in their lives."},
+{lv:4,ja:"最初の2文（目的＋情報評価）",en:"I believe that the main purpose of education is to teach people how to think for themselves. In today's world, information is everywhere, so it's more important to know how to evaluate it than just to memorize facts."},
+{lv:4,ja:"最後の2文（社会の一員＋よりよい決断）",en:"Education should also help students become responsible members of society. When people can think critically, they can make better decisions in their lives."},
+]},
+{id:3,title:"A Person Who Inspires You",full:"The person who inspires me most is my late father. What made him special was that he worked very hard but was always kind to everyone. He treated all people with respect, whether they were rich or poor. He taught me that success isn't just about your job - it's also about how you treat others. His example shows that you can be both hardworking and caring at the same time.",steps:[
+{lv:1,ja:"亡き父",en:"my late father"},
+{lv:1,ja:"全ての人を尊重する",en:"treated all people with respect"},
+{lv:1,ja:"成功とは仕事だけではない",en:"success isn't just about your job"},
+{lv:1,ja:"勤勉で思いやりがある",en:"hardworking and caring"},
+{lv:2,ja:"彼を特別にしたのは一生懸命働いていつも親切だったこと",en:"What made him special was that he worked very hard but was always kind to everyone."},
+{lv:2,ja:"富裕層でも貧困層でも全ての人を尊重した",en:"He treated all people with respect, whether they were rich or poor."},
+{lv:2,ja:"成功は仕事だけでなく他人への接し方でもある",en:"success isn't just about your job - it's also about how you treat others."},
+{lv:3,ja:"最も自分を鼓舞する人は亡き父である",en:"The person who inspires me most is my late father."},
+{lv:3,ja:"彼は成功は仕事だけでなく他人への接し方でもあると教えてくれた",en:"He taught me that success isn't just about your job - it's also about how you treat others."},
+{lv:3,ja:"彼の手本は勤勉で思いやりがある人になれることを示している",en:"His example shows that you can be both hardworking and caring at the same time."},
+{lv:4,ja:"最初の2文（亡き父＋特別な理由）",en:"The person who inspires me most is my late father. What made him special was that he worked very hard but was always kind to everyone."},
+{lv:4,ja:"最後の2文（成功の定義＋彼の手本）",en:"He taught me that success isn't just about your job - it's also about how you treat others. His example shows that you can be both hardworking and caring at the same time."},
+]},
+{id:4,title:"Environmental Issue",full:"I'm concerned about air pollution, especially in big cities. This affects people's health and can cause breathing problems. We can help by using public transportation or riding bicycles instead of driving cars. Planting more trees in cities is also helpful. The government should make stricter rules for factories and invest more in clean energy. Both individuals and governments need to work together on this.",steps:[
+{lv:1,ja:"大気汚染",en:"air pollution"},
+{lv:1,ja:"公共交通機関を使う",en:"using public transportation"},
+{lv:1,ja:"クリーンエネルギー",en:"clean energy"},
+{lv:1,ja:"個人と政府",en:"individuals and governments"},
+{lv:2,ja:"大気汚染が心配、特に大都市では",en:"I'm concerned about air pollution, especially in big cities."},
+{lv:2,ja:"車を運転する代わりに公共交通機関や自転車を使う",en:"using public transportation or riding bicycles instead of driving cars."},
+{lv:2,ja:"政府は工場に厳しいルールを設けクリーンエネルギーに投資すべき",en:"The government should make stricter rules for factories and invest more in clean energy."},
+{lv:3,ja:"これは人々の健康に影響し呼吸障害を引き起こす可能性がある",en:"This affects people's health and can cause breathing problems."},
+{lv:3,ja:"都市にもっと木を植えることも効果的である",en:"Planting more trees in cities is also helpful."},
+{lv:3,ja:"個人と政府の両方がこの問題に協力して取り組む必要がある",en:"Both individuals and governments need to work together on this."},
+{lv:4,ja:"最初の2文（大気汚染＋健康への影響）",en:"I'm concerned about air pollution, especially in big cities. This affects people's health and can cause breathing problems."},
+{lv:4,ja:"最後の2文（政府の役割＋協力）",en:"The government should make stricter rules for factories and invest more in clean energy. Both individuals and governments need to work together on this."},
+]},
+{id:5,title:"Cultural Custom (New Year)",full:"One important tradition in my country is New Year's Day, or Oshougatsu. We celebrate by cleaning our houses before the new year and preparing special foods called osechi. Each dish has a special meaning - for example, black beans represent health. On New Year's Day, families gather to eat together and visit shrines. This custom is meaningful because it brings families together and gives us time to think about the past year and our hopes for the future.",steps:[
+{lv:1,ja:"お正月（おしょうがつ）",en:"New Year's Day, or Oshougatsu"},
+{lv:1,ja:"おせち料理",en:"special foods called osechi"},
+{lv:1,ja:"黒豆は健康を表す",en:"black beans represent health"},
+{lv:1,ja:"神社を参拝する",en:"visit shrines"},
+{lv:2,ja:"大掃除をしておせちを作ることでお祝いする",en:"We celebrate by cleaning our houses before the new year and preparing special foods called osechi."},
+{lv:2,ja:"各料理には特別な意味がある",en:"Each dish has a special meaning"},
+{lv:2,ja:"家族が集まって食事をし神社を参拝する",en:"families gather to eat together and visit shrines."},
+{lv:3,ja:"私の国の大切な伝統の一つはお正月だ",en:"One important tradition in my country is New Year's Day, or Oshougatsu."},
+{lv:3,ja:"この風習は家族を一緒にし過去の年と将来の希望を考える時間をくれる",en:"This custom is meaningful because it brings families together and gives us time to think about the past year and our hopes for the future."},
+{lv:4,ja:"最初の2文（お正月＋お祝いの仕方）",en:"One important tradition in my country is New Year's Day, or Oshougatsu. We celebrate by cleaning our houses before the new year and preparing special foods called osechi."},
+{lv:4,ja:"最後の2文（家族が集まる＋意味）",en:"On New Year's Day, families gather to eat together and visit shrines. This custom is meaningful because it brings families together and gives us time to think about the past year and our hopes for the future."},
+]},
+{id:6,title:"Favorite Holiday",full:"My favorite holiday is New Year's Day. What makes it special is that it's a time for both celebration and reflection. I enjoy going to my mother's house with my family because we can spend quality time together. It gives me a chance to think about what I did last year and set goals for the new year. The combination of family, traditional food, and looking forward to the future makes it my favorite holiday.",steps:[
+{lv:1,ja:"お祝いと振り返りの時間",en:"celebration and reflection"},
+{lv:1,ja:"充実した時間を過ごす",en:"spend quality time together"},
+{lv:1,ja:"新年の目標を立てる",en:"set goals for the new year"},
+{lv:2,ja:"特別なのはお祝いと振り返りの時間であること",en:"What makes it special is that it's a time for both celebration and reflection."},
+{lv:2,ja:"母の家に行き充実した時間を一緒に過ごせる",en:"I enjoy going to my mother's house with my family because we can spend quality time together."},
+{lv:2,ja:"去年のことを振り返り新年の目標を立てる機会をくれる",en:"It gives me a chance to think about what I did last year and set goals for the new year."},
+{lv:3,ja:"好きな祝日はお正月だ",en:"My favorite holiday is New Year's Day."},
+{lv:3,ja:"家族・伝統的な食べ物・未来への期待の組み合わせが好きな祝日にしている",en:"The combination of family, traditional food, and looking forward to the future makes it my favorite holiday."},
+{lv:4,ja:"最初の2文（好きな祝日＋特別な理由）",en:"My favorite holiday is New Year's Day. What makes it special is that it's a time for both celebration and reflection."},
+{lv:4,ja:"最後の2文（目標設定＋まとめ）",en:"It gives me a chance to think about what I did last year and set goals for the new year. The combination of family, traditional food, and looking forward to the future makes it my favorite holiday."},
+]},
+{id:7,title:"Friendship",full:"Friendship is important to me because true friends give honest advice, even when it's hard to hear. They help me see things from different perspectives when I face problems. I can be myself around them without worrying about being judged. Good friends also support me when I'm going through difficult times and celebrate with me when things go well. Having people who truly understand you makes life much better.",steps:[
+{lv:1,ja:"正直なアドバイスをくれる",en:"give honest advice"},
+{lv:1,ja:"違う視点から物事を見る",en:"see things from different perspectives"},
+{lv:1,ja:"自分らしくいられる",en:"be myself"},
+{lv:1,ja:"困難な時にサポートしてくれる",en:"support me when I'm going through difficult times"},
+{lv:2,ja:"聞くのが辛くても正直なアドバイスをくれる",en:"true friends give honest advice, even when it's hard to hear."},
+{lv:2,ja:"問題に直面したとき違う視点から物事を見るのを助けてくれる",en:"They help me see things from different perspectives when I face problems."},
+{lv:2,ja:"判断を気にせず自分らしくいられる",en:"I can be myself around them without worrying about being judged."},
+{lv:3,ja:"友情が大切な理由は真の友人が正直なアドバイスをくれるから",en:"Friendship is important to me because true friends give honest advice, even when it's hard to hear."},
+{lv:3,ja:"本当に自分を理解してくれる人がいると人生がずっと良くなる",en:"Having people who truly understand you makes life much better."},
+{lv:4,ja:"最初の2文（友情＋違う視点）",en:"Friendship is important to me because true friends give honest advice, even when it's hard to hear. They help me see things from different perspectives when I face problems."},
+{lv:4,ja:"最後の2文（サポート＋人生が良くなる）",en:"Good friends also support me when I'm going through difficult times and celebrate with me when things go well. Having people who truly understand you makes life much better."},
+]},
+{id:8,title:"Public Transportation vs. Driving",full:"There are advantages and disadvantages to both options. On one hand, public transportation is cheaper and better for the environment. You don't have to pay for gas, parking, or car maintenance. On the other hand, cars give you more freedom. You can go anywhere at any time without waiting for buses or trains. The main benefit of driving is convenience, but the downside is the cost and environmental impact. I think the best choice depends on where you live and what you need.",steps:[
+{lv:1,ja:"一方では",en:"On one hand"},
+{lv:1,ja:"他方では",en:"On the other hand"},
+{lv:1,ja:"ガス・駐車場・車のメンテナンス",en:"gas, parking, or car maintenance"},
+{lv:1,ja:"環境への影響",en:"environmental impact"},
+{lv:2,ja:"公共交通機関は安くて環境に優しい",en:"public transportation is cheaper and better for the environment."},
+{lv:2,ja:"車はより多くの自由を与えてくれる",en:"cars give you more freedom."},
+{lv:2,ja:"運転の主なメリットは利便性だがデメリットはコストと環境への影響",en:"The main benefit of driving is convenience, but the downside is the cost and environmental impact."},
+{lv:3,ja:"どちらの選択肢にも長所と短所がある",en:"There are advantages and disadvantages to both options."},
+{lv:3,ja:"最善の選択は住む場所とニーズによると思う",en:"I think the best choice depends on where you live and what you need."},
+{lv:4,ja:"公共交通機関の利点2文",en:"On one hand, public transportation is cheaper and better for the environment. You don't have to pay for gas, parking, or car maintenance."},
+{lv:4,ja:"車の利点2文",en:"On the other hand, cars give you more freedom. You can go anywhere at any time without waiting for buses or trains."},
+]},
+{id:9,title:"Favorite Weather",full:"I prefer sunny weather because it makes me feel positive and energetic. When it's sunny, I can go for walks, take photos outside, or just enjoy my morning coffee on the balcony. Sunny weather puts me in a good mood and helps me be more productive. I also feel more motivated to exercise and spend time outdoors. Of course, I appreciate other types of weather too, but nothing beats a clear, sunny day for me.",steps:[
+{lv:1,ja:"ポジティブでエネルギッシュ",en:"positive and energetic"},
+{lv:1,ja:"バルコニーでコーヒーを楽しむ",en:"enjoy my morning coffee on the balcony"},
+{lv:1,ja:"気分が良くなる",en:"puts me in a good mood"},
+{lv:1,ja:"屋外で時間を過ごす",en:"spend time outdoors"},
+{lv:2,ja:"晴れた天気はポジティブでエネルギッシュな気分にさせてくれる",en:"I prefer sunny weather because it makes me feel positive and energetic."},
+{lv:2,ja:"晴れていると散歩したり写真を撮ったりできる",en:"When it's sunny, I can go for walks, take photos outside, or just enjoy my morning coffee on the balcony."},
+{lv:2,ja:"晴れた天気は気分を良くしより生産的になるのを助けてくれる",en:"Sunny weather puts me in a good mood and helps me be more productive."},
+{lv:3,ja:"運動する意欲が増し屋外で過ごしたくなる",en:"I also feel more motivated to exercise and spend time outdoors."},
+{lv:3,ja:"晴れた日に勝るものはない",en:"nothing beats a clear, sunny day for me."},
+{lv:4,ja:"最初の2文（晴れが好き＋できること）",en:"I prefer sunny weather because it makes me feel positive and energetic. When it's sunny, I can go for walks, take photos outside, or just enjoy my morning coffee on the balcony."},
+{lv:4,ja:"最後の2文（運動＋まとめ）",en:"I also feel more motivated to exercise and spend time outdoors. Of course, I appreciate other types of weather too, but nothing beats a clear, sunny day for me."},
+]},
+{id:10,title:"Dream Travel Destination",full:"If I could travel anywhere, I would go to Italy. I've always wanted to try authentic Italian food in its home country - not just pizza, but regional dishes from different areas. What attracts me most is the combination of food, history, and beautiful architecture. I'd love to experience places like Rome and Florence, where you can see ancient buildings and world-famous art. Italian culture also seems to value enjoying life, which I find appealing.",steps:[
+{lv:1,ja:"本物のイタリア料理",en:"authentic Italian food"},
+{lv:1,ja:"地域の料理",en:"regional dishes"},
+{lv:1,ja:"古代の建物と世界的に有名な芸術",en:"ancient buildings and world-famous art"},
+{lv:1,ja:"人生を楽しむことを大切にする",en:"value enjoying life"},
+{lv:2,ja:"どこへでも行けるとしたらイタリアに行く",en:"If I could travel anywhere, I would go to Italy."},
+{lv:2,ja:"本場の本物のイタリア料理を食べたかった",en:"I've always wanted to try authentic Italian food in its home country"},
+{lv:2,ja:"最も惹かれるのは食べ物・歴史・美しい建築の組み合わせ",en:"What attracts me most is the combination of food, history, and beautiful architecture."},
+{lv:3,ja:"古代の建物と世界的に有名な芸術が見られるローマとフィレンツェを体験したい",en:"I'd love to experience places like Rome and Florence, where you can see ancient buildings and world-famous art."},
+{lv:3,ja:"イタリア文化は人生を楽しむことを大切にしているようでそれが魅力的",en:"Italian culture also seems to value enjoying life, which I find appealing."},
+{lv:4,ja:"最初の2文（イタリアへ＋食べ物）",en:"If I could travel anywhere, I would go to Italy. I've always wanted to try authentic Italian food in its home country - not just pizza, but regional dishes from different areas."},
+{lv:4,ja:"最後の2文（ローマ・フィレンツェ＋文化）",en:"I'd love to experience places like Rome and Florence, where you can see ancient buildings and world-famous art. Italian culture also seems to value enjoying life, which I find appealing."},
+]},
+{id:11,title:"Favorite Technology",full:"The technology I use most is my smartphone. It has changed my life by making communication so much easier. I can stay in touch with friends and family through messages and video calls. It also allows me to access information instantly - I can look up anything I need to know in seconds. I can't imagine living without it now. However, I try to be careful not to spend too much time looking at the screen.",steps:[
+{lv:1,ja:"コミュニケーションをずっと簡単にする",en:"making communication so much easier"},
+{lv:1,ja:"連絡を取り続ける",en:"stay in touch"},
+{lv:1,ja:"即座に情報にアクセスする",en:"access information instantly"},
+{lv:1,ja:"スクリーンを見る時間を使いすぎないように",en:"not to spend too much time looking at the screen"},
+{lv:2,ja:"コミュニケーションをずっと簡単にすることで生活を変えた",en:"It has changed my life by making communication so much easier."},
+{lv:2,ja:"メッセージやビデオ通話で友人や家族と連絡を取り続けられる",en:"I can stay in touch with friends and family through messages and video calls."},
+{lv:2,ja:"今やそれなしの生活は想像できない",en:"I can't imagine living without it now."},
+{lv:3,ja:"最もよく使うテクノロジーはスマートフォンだ",en:"The technology I use most is my smartphone."},
+{lv:3,ja:"即座に情報にアクセスできて数秒で何でも調べられる",en:"It also allows me to access information instantly - I can look up anything I need to know in seconds."},
+{lv:4,ja:"最初の2文（スマホ＋生活が変わった）",en:"The technology I use most is my smartphone. It has changed my life by making communication so much easier."},
+{lv:4,ja:"最後の2文（なしでは生活できない＋気をつけていること）",en:"I can't imagine living without it now. However, I try to be careful not to spend too much time looking at the screen."},
+]},
+{id:12,title:"Historical Figure (Helen Keller)",full:"I admire Helen Keller because she overcame incredible challenges. Despite losing both her sight and hearing as a young child, she learned to communicate and became a famous writer and speaker. Her story teaches us that our limitations don't define what we can achieve. With determination and the right support, people can accomplish amazing things. She also spent her life helping others with disabilities, which makes her even more inspiring.",steps:[
+{lv:1,ja:"信じられない困難を乗り越えた",en:"overcame incredible challenges"},
+{lv:1,ja:"視力と聴力の両方を失った",en:"losing both her sight and hearing"},
+{lv:1,ja:"私たちの限界は達成できることを定義しない",en:"our limitations don't define what we can achieve"},
+{lv:1,ja:"障害のある人たちを助けた",en:"helping others with disabilities"},
+{lv:2,ja:"幼いころに視力と聴力の両方を失ったにもかかわらずコミュニケーションを学んだ",en:"Despite losing both her sight and hearing as a young child, she learned to communicate and became a famous writer and speaker."},
+{lv:2,ja:"彼女の話は限界が達成できることを定義しないと教えてくれる",en:"Her story teaches us that our limitations don't define what we can achieve."},
+{lv:2,ja:"決意と適切なサポートがあれば人は素晴らしいことを成し遂げられる",en:"With determination and the right support, people can accomplish amazing things."},
+{lv:3,ja:"ヘレン・ケラーを尊敬するのは信じられない困難を乗り越えたから",en:"I admire Helen Keller because she overcame incredible challenges."},
+{lv:3,ja:"障害のある人を助けるために人生を捧げそれがさらに感動的にしている",en:"She also spent her life helping others with disabilities, which makes her even more inspiring."},
+{lv:4,ja:"最初の2文（尊敬する理由＋視力・聴力を失っても）",en:"I admire Helen Keller because she overcame incredible challenges. Despite losing both her sight and hearing as a young child, she learned to communicate and became a famous writer and speaker."},
+{lv:4,ja:"最後の2文（限界を超えて＋人を助ける）",en:"With determination and the right support, people can accomplish amazing things. She also spent her life helping others with disabilities, which makes her even more inspiring."},
+]},
+{id:13,title:"Impactful Movie (Toy Story)",full:"A movie that really affected me was Toy Story. It's an animated film, but it has deep messages about friendship and loyalty. The message I took from it was that true friendship means accepting others and putting their needs alongside your own. I was moved by how the characters support each other through difficult times. It made me realize that good relationships require effort and understanding. Even though it's a children's movie, I think adults can learn a lot from it too.",steps:[
+{lv:1,ja:"友情と忠誠心についての深いメッセージ",en:"deep messages about friendship and loyalty"},
+{lv:1,ja:"他者を受け入れ彼らのニーズを自分のものと並べる",en:"accepting others and putting their needs alongside your own"},
+{lv:1,ja:"良い関係には努力と理解が必要",en:"good relationships require effort and understanding"},
+{lv:2,ja:"本当に影響を受けた映画はトイストーリーだった",en:"A movie that really affected me was Toy Story."},
+{lv:2,ja:"アニメだが友情と忠誠心についての深いメッセージがある",en:"It's an animated film, but it has deep messages about friendship and loyalty."},
+{lv:2,ja:"キャラクターが困難な時に互いをサポートする様子に感動した",en:"I was moved by how the characters support each other through difficult times."},
+{lv:3,ja:"得たメッセージは真の友情は他者を受け入れることを意味するということ",en:"The message I took from it was that true friendship means accepting others and putting their needs alongside your own."},
+{lv:3,ja:"子供向けの映画だが大人も多くのことを学べると思う",en:"Even though it's a children's movie, I think adults can learn a lot from it too."},
+{lv:4,ja:"最初の2文（映画の紹介＋深いメッセージ）",en:"A movie that really affected me was Toy Story. It's an animated film, but it has deep messages about friendship and loyalty."},
+{lv:4,ja:"最後の2文（良い関係＋大人も学べる）",en:"It made me realize that good relationships require effort and understanding. Even though it's a children's movie, I think adults can learn a lot from it too."},
+]},
+{id:14,title:"Skill to Learn (Medicinal Cooking)",full:"I'd like to learn medicinal cooking, which means using food to support health. I'm interested in this because food affects our bodies in many ways. This skill would help me take better care of my family by preparing meals that are both delicious and healthy. It would allow me to understand which foods are good for different conditions - like what to eat when you have a cold or feel tired. I think this knowledge could really improve our daily lives.",steps:[
+{lv:1,ja:"薬膳料理",en:"medicinal cooking"},
+{lv:1,ja:"健康をサポートするために食べ物を使う",en:"using food to support health"},
+{lv:1,ja:"おいしくて健康的な食事",en:"meals that are both delicious and healthy"},
+{lv:1,ja:"日常生活を改善する",en:"improve our daily lives"},
+{lv:2,ja:"薬膳料理とは健康をサポートするために食べ物を使うこと",en:"I'd like to learn medicinal cooking, which means using food to support health."},
+{lv:2,ja:"おいしくて健康的な食事を作ることで家族をよりよく世話できる",en:"This skill would help me take better care of my family by preparing meals that are both delicious and healthy."},
+{lv:2,ja:"風邪を引いたときや疲れたときに何を食べるべきかなど",en:"like what to eat when you have a cold or feel tired."},
+{lv:3,ja:"この知識は本当に日常生活を改善できると思う",en:"I think this knowledge could really improve our daily lives."},
+{lv:3,ja:"食べ物はさまざまな意味で体に影響するので興味がある",en:"I'm interested in this because food affects our bodies in many ways."},
+{lv:4,ja:"最初の2文（薬膳料理とは＋興味の理由）",en:"I'd like to learn medicinal cooking, which means using food to support health. I'm interested in this because food affects our bodies in many ways."},
+{lv:4,ja:"最後の2文（食べ物と体の状態＋まとめ）",en:"It would allow me to understand which foods are good for different conditions - like what to eat when you have a cold or feel tired. I think this knowledge could really improve our daily lives."},
+]},
+{id:15,title:"Challenging Situation",full:"One of the most difficult times was when I got seriously ill last year. I had to stay in bed for a long time, which gave me time to think about my life. It made me realize that I had some regrets about not studying harder when I was younger. I learned from this experience that we shouldn't wait to do important things. After that, I decided to start taking online courses. The illness was hard, but it helped me understand what really matters to me.",steps:[
+{lv:1,ja:"深刻な病気になった",en:"got seriously ill"},
+{lv:1,ja:"長い間ベッドにいなければならなかった",en:"had to stay in bed for a long time"},
+{lv:1,ja:"若い頃もっと勉強しなかった後悔",en:"regrets about not studying harder when I was younger"},
+{lv:1,ja:"重要なことを後回しにしてはいけない",en:"we shouldn't wait to do important things"},
+{lv:2,ja:"最も困難な時の一つは昨年深刻な病気になったとき",en:"One of the most difficult times was when I got seriously ill last year."},
+{lv:2,ja:"若い頃もっと勉強しなかったことへの後悔に気づかせてくれた",en:"It made me realize that I had some regrets about not studying harder when I was younger."},
+{lv:2,ja:"この経験から重要なことを後回しにしてはいけないと学んだ",en:"I learned from this experience that we shouldn't wait to do important things."},
+{lv:3,ja:"その後オンラインコースを受講することにした",en:"After that, I decided to start taking online courses."},
+{lv:3,ja:"病気は辛かったが本当に大切なものを理解するのに役立った",en:"The illness was hard, but it helped me understand what really matters to me."},
+{lv:4,ja:"最初の2文（病気になった＋考える時間）",en:"One of the most difficult times was when I got seriously ill last year. I had to stay in bed for a long time, which gave me time to think about my life."},
+{lv:4,ja:"最後の2文（オンラインコース＋気づき）",en:"After that, I decided to start taking online courses. The illness was hard, but it helped me understand what really matters to me."},
+]},
+{id:16,title:"Passion for Reading",full:"I'm passionate about reading books. Reading helps me learn new things and understand different perspectives. Through books, I can experience stories and ideas from around the world without leaving my home. I try to read a variety of genres - both fiction and non-fiction - to keep learning and growing. Fiction develops my imagination and empathy, while non-fiction teaches me practical knowledge. It's a hobby that never gets boring because there's always something new to discover.",steps:[
+{lv:1,ja:"様々なジャンルを読む",en:"read a variety of genres"},
+{lv:1,ja:"フィクションとノンフィクション",en:"fiction and non-fiction"},
+{lv:1,ja:"想像力と共感を育てる",en:"develops my imagination and empathy"},
+{lv:1,ja:"実践的な知識を教えてくれる",en:"teaches me practical knowledge"},
+{lv:2,ja:"本を読むことに情熱を持っている",en:"I'm passionate about reading books."},
+{lv:2,ja:"家を離れずに世界中の物語やアイデアを体験できる",en:"Through books, I can experience stories and ideas from around the world without leaving my home."},
+{lv:2,ja:"フィクションは想像力と共感を育てノンフィクションは実践的な知識を教えてくれる",en:"Fiction develops my imagination and empathy, while non-fiction teaches me practical knowledge."},
+{lv:3,ja:"読書は新しいことを学び様々な視点を理解するのに役立つ",en:"Reading helps me learn new things and understand different perspectives."},
+{lv:3,ja:"常に新しい発見があるので飽きることのない趣味",en:"It's a hobby that never gets boring because there's always something new to discover."},
+{lv:4,ja:"最初の2文（読書が好き＋役に立つ理由）",en:"I'm passionate about reading books. Reading helps me learn new things and understand different perspectives."},
+{lv:4,ja:"最後の2文（フィクション vs ノンフィクション＋まとめ）",en:"Fiction develops my imagination and empathy, while non-fiction teaches me practical knowledge. It's a hobby that never gets boring because there's always something new to discover."},
+]},
+{id:17,title:"Work Experience Lesson",full:"Through my work experience, I learned that being punctual and polite is extremely important. At first, I thought these were just basic rules. But I realized that arriving on time shows respect for other people's time. Being polite creates a positive working environment and builds trust with colleagues. This has helped me in my career because people see me as reliable. I've noticed that workers with good manners often get more opportunities than those who don't, even if their skills are similar.",steps:[
+{lv:1,ja:"時間を守り礼儀正しい",en:"being punctual and polite"},
+{lv:1,ja:"時間通りに来ることは他者の時間への敬意",en:"arriving on time shows respect for other people's time"},
+{lv:1,ja:"ポジティブな職場環境を作る",en:"creates a positive working environment"},
+{lv:1,ja:"信頼できる人と見られる",en:"people see me as reliable"},
+{lv:2,ja:"仕事経験を通じて時間を守り礼儀正しいことが非常に重要と学んだ",en:"Through my work experience, I learned that being punctual and polite is extremely important."},
+{lv:2,ja:"礼儀正しくあることは職場環境を良くし同僚との信頼を築く",en:"Being polite creates a positive working environment and builds trust with colleagues."},
+{lv:2,ja:"礼儀正しい人はスキルが似ていてもより多くの機会を得ることが多い",en:"workers with good manners often get more opportunities than those who don't, even if their skills are similar."},
+{lv:3,ja:"最初はこれらは単なる基本的なルールだと思っていた",en:"At first, I thought these were just basic rules."},
+{lv:3,ja:"人々が私を信頼できると見るのでキャリアに役立っている",en:"This has helped me in my career because people see me as reliable."},
+{lv:4,ja:"最初の2文（学んだこと＋最初の考え）",en:"Through my work experience, I learned that being punctual and polite is extremely important. At first, I thought these were just basic rules."},
+{lv:4,ja:"最後の2文（礼儀正しさ＋機会）",en:"This has helped me in my career because people see me as reliable. I've noticed that workers with good manners often get more opportunities than those who don't, even if their skills are similar."},
+]},
+{id:18,title:"Favorite Dish (Ramen)",full:"My favorite dish is ramen. It consists of noodles in a rich broth, usually with sliced pork, egg, and green onions. What makes it special is that the broth takes many hours to prepare - some restaurants cook it for over 12 hours. It reminds me of good times with friends after school or work, sitting in a warm restaurant on a cold day. The taste is comforting, and each region of Japan has its own style. For me, ramen is not just food - it's connected to happy memories.",steps:[
+{lv:1,ja:"濃厚なスープのラーメン",en:"noodles in a rich broth"},
+{lv:1,ja:"スープは何時間もかけて作る",en:"the broth takes many hours to prepare"},
+{lv:1,ja:"温かみのある味",en:"The taste is comforting"},
+{lv:1,ja:"幸せな思い出と結びついている",en:"connected to happy memories"},
+{lv:2,ja:"好きな料理はラーメンだ",en:"My favorite dish is ramen."},
+{lv:2,ja:"特別なのはスープに何時間もかかること12時間以上煮るレストランもある",en:"What makes it special is that the broth takes many hours to prepare - some restaurants cook it for over 12 hours."},
+{lv:2,ja:"寒い日に温かいレストランで学校や仕事後の友人との良い時間を思い出させる",en:"It reminds me of good times with friends after school or work, sitting in a warm restaurant on a cold day."},
+{lv:3,ja:"味は温かみがあり日本の各地域に独自のスタイルがある",en:"The taste is comforting, and each region of Japan has its own style."},
+{lv:3,ja:"ラーメンは単なる食べ物ではなく幸せな思い出と結びついている",en:"For me, ramen is not just food - it's connected to happy memories."},
+{lv:4,ja:"最初の2文（ラーメンとは＋特別な理由）",en:"My favorite dish is ramen. It consists of noodles in a rich broth, usually with sliced pork, egg, and green onions."},
+{lv:4,ja:"最後の2文（地域ごとのスタイル＋思い出）",en:"The taste is comforting, and each region of Japan has its own style. For me, ramen is not just food - it's connected to happy memories."},
+]},
+{id:19,title:"Inspiring Book/Movie (Harry Potter)",full:"Harry Potter has influenced me greatly. The main lesson I took from it was that courage doesn't mean you're not afraid - it means doing the right thing even when you are scared. The characters in the story often feel fear, but they choose to act anyway. It showed me that everyone can be brave in their own way. I apply this to my own life by trying to face difficult situations instead of avoiding them. This series taught me that our choices matter more than our abilities.",steps:[
+{lv:1,ja:"勇気は恐れていないことを意味しない",en:"courage doesn't mean you're not afraid"},
+{lv:1,ja:"恐れていても正しいことをする",en:"doing the right thing even when you are scared"},
+{lv:1,ja:"自分なりの方法で勇敢になれる",en:"everyone can be brave in their own way"},
+{lv:1,ja:"能力よりも選択の方が重要",en:"our choices matter more than our abilities"},
+{lv:2,ja:"ハリー・ポッターは大きく影響を与えてくれた",en:"Harry Potter has influenced me greatly."},
+{lv:2,ja:"勇気とは恐れていないことではなく恐れていても正しいことをすること",en:"courage doesn't mean you're not afraid - it means doing the right thing even when you are scared."},
+{lv:2,ja:"困難な状況を避けるのではなく向き合おうとすることでこれを生活に応用している",en:"I apply this to my own life by trying to face difficult situations instead of avoiding them."},
+{lv:3,ja:"キャラクターはよく恐怖を感じるがそれでも行動することを選ぶ",en:"The characters in the story often feel fear, but they choose to act anyway."},
+{lv:3,ja:"このシリーズは能力よりも選択の方が重要だと教えてくれた",en:"This series taught me that our choices matter more than our abilities."},
+{lv:4,ja:"最初の2文（影響＋勇気の定義）",en:"Harry Potter has influenced me greatly. The main lesson I took from it was that courage doesn't mean you're not afraid - it means doing the right thing even when you are scared."},
+{lv:4,ja:"最後の2文（自分の生活への応用＋まとめ）",en:"I apply this to my own life by trying to face difficult situations instead of avoiding them. This series taught me that our choices matter more than our abilities."},
+]},
+{id:20,title:"Difficult Decision (University)",full:"One of the hardest decisions I made was choosing my university major. I had to consider many things: what I'm interested in, job opportunities, and my future career. I was torn between following my passion and choosing something practical. In the end, I tried to find a balance between both. Looking back, I think the most important thing is to make a decision and commit to it fully. No choice is perfect, but we can make any path work if we put in the effort.",steps:[
+{lv:1,ja:"大学の専攻を選ぶ",en:"choosing my university major"},
+{lv:1,ja:"情熱と現実的なものの間で迷った",en:"torn between following my passion and choosing something practical"},
+{lv:1,ja:"バランスを見つける",en:"find a balance between both"},
+{lv:1,ja:"決断してそれに完全に取り組む",en:"make a decision and commit to it fully"},
+{lv:2,ja:"最も難しい決断の一つは大学の専攻を選ぶことだった",en:"One of the hardest decisions I made was choosing my university major."},
+{lv:2,ja:"情熱に従うことと現実的なものを選ぶことの間で迷った",en:"I was torn between following my passion and choosing something practical."},
+{lv:2,ja:"最終的に両者のバランスを見つけようとした",en:"In the end, I tried to find a balance between both."},
+{lv:3,ja:"最も重要なのは決断してそれに完全に取り組むこと",en:"I think the most important thing is to make a decision and commit to it fully."},
+{lv:3,ja:"完璧な選択はないが努力すればどんな道でも成功できる",en:"No choice is perfect, but we can make any path work if we put in the effort."},
+{lv:4,ja:"最初の2文（大学の専攻＋考慮したこと）",en:"One of the hardest decisions I made was choosing my university major. I had to consider many things: what I'm interested in, job opportunities, and my future career."},
+{lv:4,ja:"最後の2文（決断の重要性＋完璧な選択はない）",en:"Looking back, I think the most important thing is to make a decision and commit to it fully. No choice is perfect, but we can make any path work if we put in the effort."},
+]},
+{id:21,title:"Learning Languages",full:"Learning a new language is valuable because it opens doors to new cultures and opportunities. When you learn a language, you can better understand how people from that culture think and live. This builds empathy and breaks down barriers between people. In addition, it helps you in your career - many companies need employees who can speak multiple languages. English, in particular, connects people from almost every country. Learning languages also keeps your brain active and improves your memory. It's challenging, but the benefits are worth the effort.",steps:[
+{lv:1,ja:"新しい文化と機会への扉を開く",en:"opens doors to new cultures and opportunities"},
+{lv:1,ja:"共感を育み人々の間の壁を壊す",en:"builds empathy and breaks down barriers between people"},
+{lv:1,ja:"複数の言語を話せる従業員",en:"employees who can speak multiple languages"},
+{lv:1,ja:"脳を活性に保ち記憶力を向上させる",en:"keeps your brain active and improves your memory"},
+{lv:2,ja:"新しい言語を学ぶことは新しい文化と機会への扉を開くので価値がある",en:"Learning a new language is valuable because it opens doors to new cultures and opportunities."},
+{lv:2,ja:"英語は特にほぼ全ての国の人々を結びつける",en:"English, in particular, connects people from almost every country."},
+{lv:3,ja:"共感を育み人々の間の壁を壊す",en:"This builds empathy and breaks down barriers between people."},
+{lv:3,ja:"挑戦的だがその利益は努力に値する",en:"It's challenging, but the benefits are worth the effort."},
+{lv:4,ja:"最初の2文（価値がある理由＋文化理解）",en:"Learning a new language is valuable because it opens doors to new cultures and opportunities. When you learn a language, you can better understand how people from that culture think and live."},
+{lv:4,ja:"最後の2文（脳の活性化＋まとめ）",en:"Learning languages also keeps your brain active and improves your memory. It's challenging, but the benefits are worth the effort."},
+]},
+{id:22,title:"Personal Skill (Cooking)",full:"A skill I'm proud of is cooking. I developed this skill by practicing every day and learning from my mistakes. At first, I just followed recipes, but now I can adjust dishes based on what ingredients I have. I use it daily to prepare healthy meals for my family. It benefits my life by saving money compared to eating out and by giving me control over what we eat. Cooking has become more than just a necessity - it's a way to show care for the people I love and to express creativity.",steps:[
+{lv:1,ja:"毎日練習し失敗から学ぶ",en:"practicing every day and learning from my mistakes"},
+{lv:1,ja:"ある材料に基づいて料理を調整する",en:"adjust dishes based on what ingredients I have"},
+{lv:1,ja:"外食と比べてお金を節約する",en:"saving money compared to eating out"},
+{lv:1,ja:"創造性を表現する方法",en:"a way to express creativity"},
+{lv:2,ja:"誇りに思っているスキルは料理だ",en:"A skill I'm proud of is cooking."},
+{lv:2,ja:"最初はレシピに従うだけだったが今は材料に応じて調整できる",en:"At first, I just followed recipes, but now I can adjust dishes based on what ingredients I have."},
+{lv:3,ja:"大切な人への気遣いを示し創造性を表現する方法",en:"it's a way to show care for the people I love and to express creativity."},
+{lv:3,ja:"外食と比べてお金を節約し食事内容をコントロールできる",en:"It benefits my life by saving money compared to eating out and by giving me control over what we eat."},
+{lv:4,ja:"最初の2文（誇りのスキル＋発達させた方法）",en:"A skill I'm proud of is cooking. I developed this skill by practicing every day and learning from my mistakes."},
+{lv:4,ja:"最後の2文（生活への利点＋単なる必需品以上）",en:"It benefits my life by saving money compared to eating out and by giving me control over what we eat. Cooking has become more than just a necessity - it's a way to show care for the people I love and to express creativity."},
+]},
+{id:23,title:"Favorite Place (Lake Kawaguchi)",full:"My favorite place to visit is Lake Kawaguchi, near Mount Fuji. What I love about it is the incredible view of the mountain reflected in the lake. It's beautiful because the scenery changes with each season - cherry blossoms in spring, colorful leaves in autumn. Going there helps me relax and forget about the stress of daily life. The peaceful atmosphere is very different from the busy city. Walking by the lake and enjoying nature reminds me of what's truly important and gives me energy to face my regular routine again.",steps:[
+{lv:1,ja:"富士山のそばの河口湖",en:"Lake Kawaguchi, near Mount Fuji"},
+{lv:1,ja:"湖に映る山の信じられない景色",en:"the incredible view of the mountain reflected in the lake"},
+{lv:1,ja:"季節ごとに景色が変わる",en:"the scenery changes with each season"},
+{lv:1,ja:"日常生活のストレスを忘れる",en:"forget about the stress of daily life"},
+{lv:2,ja:"好きな場所は富士山近くの河口湖だ",en:"My favorite place to visit is Lake Kawaguchi, near Mount Fuji."},
+{lv:2,ja:"春の桜、秋の紅葉と季節ごとに景色が変わるので美しい",en:"It's beautiful because the scenery changes with each season - cherry blossoms in spring, colorful leaves in autumn."},
+{lv:3,ja:"穏やかな雰囲気は忙しい都市とは全く違う",en:"The peaceful atmosphere is very different from the busy city."},
+{lv:3,ja:"湖のそばを歩いて自然を楽しむことで本当に大切なものを思い出させてくれる",en:"Walking by the lake and enjoying nature reminds me of what's truly important and gives me energy to face my regular routine again."},
+{lv:4,ja:"最初の2文（河口湖＋山の景色）",en:"My favorite place to visit is Lake Kawaguchi, near Mount Fuji. What I love about it is the incredible view of the mountain reflected in the lake."},
+{lv:4,ja:"最後の2文（穏やかな雰囲気＋エネルギーをくれる）",en:"The peaceful atmosphere is very different from the busy city. Walking by the lake and enjoying nature reminds me of what's truly important and gives me energy to face my regular routine again."},
+]},
+{id:24,title:"Technology in Society",full:"Technology has both benefits and drawbacks. On the positive side, it has made communication easier than ever. We can talk to anyone in the world instantly and access information about almost anything. However, we should be careful about privacy and spending too much time on screens. Many people now have less face-to-face interaction than before, which can affect relationships. The key is to use technology wisely - taking advantage of its benefits while maintaining real human connections and protecting our personal information.",steps:[
+{lv:1,ja:"利点と欠点の両方",en:"both benefits and drawbacks"},
+{lv:1,ja:"コミュニケーションをこれまで以上に簡単に",en:"made communication easier than ever"},
+{lv:1,ja:"プライバシーに気をつける",en:"be careful about privacy"},
+{lv:1,ja:"テクノロジーを賢く使う",en:"use technology wisely"},
+{lv:2,ja:"テクノロジーには利点と欠点の両方がある",en:"Technology has both benefits and drawbacks."},
+{lv:2,ja:"プライバシーとスクリーンを見る時間を使いすぎることに気をつけるべき",en:"we should be careful about privacy and spending too much time on screens."},
+{lv:3,ja:"多くの人が以前より対面での交流が減りそれが人間関係に影響する可能性がある",en:"Many people now have less face-to-face interaction than before, which can affect relationships."},
+{lv:3,ja:"利点を活かしながら本物の人間とのつながりを維持し個人情報を守る",en:"taking advantage of its benefits while maintaining real human connections and protecting our personal information."},
+{lv:4,ja:"最初の2文（利点と欠点＋コミュニケーション）",en:"Technology has both benefits and drawbacks. On the positive side, it has made communication easier than ever."},
+{lv:4,ja:"最後の2文（対面の交流減少＋賢い使い方）",en:"Many people now have less face-to-face interaction than before, which can affect relationships. The key is to use technology wisely - taking advantage of its benefits while maintaining real human connections and protecting our personal information."},
+]},
+{id:25,title:"Environmental Conservation",full:"We need to protect the environment for future generations. Simple actions like reducing plastic use and saving water can make a difference. For example, we can bring our own bags when shopping and turn off the tap while brushing our teeth. Both individuals and governments must take responsibility - people should change their habits, and governments should create laws to protect nature. Future generations will benefit if we start taking action now. It's not too late, but we need to act quickly and consistently.",steps:[
+{lv:1,ja:"将来の世代のために環境を守る",en:"protect the environment for future generations"},
+{lv:1,ja:"プラスチックの使用を減らし水を節約する",en:"reducing plastic use and saving water"},
+{lv:1,ja:"責任を取る",en:"take responsibility"},
+{lv:1,ja:"迅速かつ一貫して行動する",en:"act quickly and consistently"},
+{lv:2,ja:"将来の世代のために環境を守る必要がある",en:"We need to protect the environment for future generations."},
+{lv:2,ja:"買い物に自分のバッグを持参し歯を磨く間は蛇口を閉める",en:"we can bring our own bags when shopping and turn off the tap while brushing our teeth."},
+{lv:3,ja:"今すぐ行動を起こせば将来の世代が恩恵を受ける",en:"Future generations will benefit if we start taking action now."},
+{lv:3,ja:"遅くはないが迅速かつ一貫して行動する必要がある",en:"It's not too late, but we need to act quickly and consistently."},
+{lv:4,ja:"最初の2文（環境保護＋簡単な行動）",en:"We need to protect the environment for future generations. Simple actions like reducing plastic use and saving water can make a difference."},
+{lv:4,ja:"最後の2文（今すぐ行動＋まとめ）",en:"Future generations will benefit if we start taking action now. It's not too late, but we need to act quickly and consistently."},
+]},
+{id:26,title:"Meeting a Historical Figure (Einstein)",full:"If I could meet anyone from history, I would choose Albert Einstein. I'm curious about how he came up with his revolutionary ideas. I would ask him about his thinking process - how he used imagination together with math and science. I think I could learn a lot from talking to him about creativity and not being afraid to question common beliefs. He also had interesting views on education and life in general. It would be amazing to understand how such a brilliant mind worked.",steps:[
+{lv:1,ja:"革命的なアイデアを思いついた",en:"came up with his revolutionary ideas"},
+{lv:1,ja:"数学と科学と共に想像力を使った",en:"used imagination together with math and science"},
+{lv:1,ja:"一般的な信念を疑うことを恐れない",en:"not being afraid to question common beliefs"},
+{lv:1,ja:"そのような天才的な頭脳",en:"such a brilliant mind"},
+{lv:2,ja:"歴史上の誰かに会えるとしたらアルバート・アインシュタインを選ぶ",en:"If I could meet anyone from history, I would choose Albert Einstein."},
+{lv:2,ja:"思考プロセスについて聞きたい数学と科学と共にどのように想像力を使ったか",en:"I would ask him about his thinking process - how he used imagination together with math and science."},
+{lv:3,ja:"彼の革命的なアイデアをどのように思いついたか知りたい",en:"I'm curious about how he came up with his revolutionary ideas."},
+{lv:3,ja:"彼は教育と人生全般について興味深い見解も持っていた",en:"He also had interesting views on education and life in general."},
+{lv:4,ja:"最初の2文（アインシュタインを選ぶ＋革命的なアイデア）",en:"If I could meet anyone from history, I would choose Albert Einstein. I'm curious about how he came up with his revolutionary ideas."},
+{lv:4,ja:"最後の2文（教育についての見解＋まとめ）",en:"He also had interesting views on education and life in general. It would be amazing to understand how such a brilliant mind worked."},
+]},
+{id:27,title:"Personal Achievement (Morning Reading)",full:"An achievement I'm proud of is building a habit of waking up at 4 AM to read English books. It was difficult at first because I'm not naturally a morning person. I succeeded by making some changes to my routine - going to bed earlier and preparing my books the night before. Now it feels natural, and I've improved my English a lot. This taught me that building good habits takes time and requires removing obstacles. You can't just rely on motivation - you need a good system.",steps:[
+{lv:1,ja:"英語の本を読むために朝4時に起きる習慣",en:"building a habit of waking up at 4 AM to read English books"},
+{lv:1,ja:"自然と朝型の人間ではない",en:"I'm not naturally a morning person"},
+{lv:1,ja:"障害を取り除く",en:"removing obstacles"},
+{lv:1,ja:"良いシステムが必要",en:"you need a good system"},
+{lv:2,ja:"誇りに思う成果は英語の本を読むために朝4時に起きる習慣を作ったこと",en:"An achievement I'm proud of is building a habit of waking up at 4 AM to read English books."},
+{lv:2,ja:"早く寝て前夜に本を準備するなどルーティンをいくつか変えて成功した",en:"I succeeded by making some changes to my routine - going to bed earlier and preparing my books the night before."},
+{lv:3,ja:"今では自然に感じられ英語がかなり上達した",en:"Now it feels natural, and I've improved my English a lot."},
+{lv:3,ja:"モチベーションだけに頼ることはできない良いシステムが必要だ",en:"You can't just rely on motivation - you need a good system."},
+{lv:4,ja:"最初の2文（成果＋難しかった理由）",en:"An achievement I'm proud of is building a habit of waking up at 4 AM to read English books. It was difficult at first because I'm not naturally a morning person."},
+{lv:4,ja:"最後の2文（学んだこと＋モチベーション vs システム）",en:"This taught me that building good habits takes time and requires removing obstacles. You can't just rely on motivation - you need a good system."},
+]},
+{id:28,title:"Adapting to New Environment",full:"When I moved to a new city, I found it challenging because I didn't know anyone there. At first, I felt lonely and homesick. Everything was unfamiliar, from the streets to the local customs. To adapt, I started talking to my neighbors and joining local groups based on my interests. Slowly, I made friends and the city began to feel like home. This experience taught me that adapting to new situations requires effort - you have to step out of your comfort zone and actively try to connect with people.",steps:[
+{lv:1,ja:"孤独でホームシック",en:"lonely and homesick"},
+{lv:1,ja:"近所の人と話し地元のグループに参加する",en:"talking to my neighbors and joining local groups"},
+{lv:1,ja:"コンフォートゾーンから出る",en:"step out of your comfort zone"},
+{lv:1,ja:"積極的に人とつながろうとする",en:"actively try to connect with people"},
+{lv:2,ja:"新しい都市に引っ越したとき誰も知らないので大変だった",en:"When I moved to a new city, I found it challenging because I didn't know anyone there."},
+{lv:2,ja:"徐々に友人ができ都市が家のように感じ始めた",en:"Slowly, I made friends and the city began to feel like home."},
+{lv:3,ja:"最初は孤独でホームシックだった",en:"At first, I felt lonely and homesick."},
+{lv:3,ja:"コンフォートゾーンから出て積極的に人とつながる必要がある",en:"you have to step out of your comfort zone and actively try to connect with people."},
+{lv:4,ja:"最初の2文（新しい都市＋孤独）",en:"When I moved to a new city, I found it challenging because I didn't know anyone there. At first, I felt lonely and homesick."},
+{lv:4,ja:"最後の2文（友人ができた＋教訓）",en:"Slowly, I made friends and the city began to feel like home. This experience taught me that adapting to new situations requires effort - you have to step out of your comfort zone and actively try to connect with people."},
+]},
+{id:29,title:"Childhood Memory (Beach)",full:"One of my happiest childhood memories is a family trip to the beach. I remember the feeling of warm sand under my feet vividly. We built sandcastles, played in the waves, and had a picnic together. What made it special was not any exciting activity, but simply being together as a family without any rush or worry. When I think about it now, I realize that the best memories aren't about expensive trips or fancy things - they're about spending quality time with people you love.",steps:[
+{lv:1,ja:"足の下の温かい砂の感触",en:"the feeling of warm sand under my feet"},
+{lv:1,ja:"砂のお城を作り波で遊んだ",en:"built sandcastles, played in the waves"},
+{lv:1,ja:"急ぎや心配なしに家族として一緒にいる",en:"being together as a family without any rush or worry"},
+{lv:1,ja:"大切な人との充実した時間",en:"spending quality time with people you love"},
+{lv:2,ja:"最も幸せな幼少期の思い出の一つは家族でのビーチ旅行だ",en:"One of my happiest childhood memories is a family trip to the beach."},
+{lv:2,ja:"特別にしたのは急ぎも心配もなく家族として一緒にいることだけ",en:"What made it special was not any exciting activity, but simply being together as a family without any rush or worry."},
+{lv:3,ja:"足の下の温かい砂の感触を鮮明に覚えている",en:"I remember the feeling of warm sand under my feet vividly."},
+{lv:3,ja:"最良の思い出は高価な旅行や派手なものではなく大切な人との充実した時間",en:"the best memories aren't about expensive trips or fancy things - they're about spending quality time with people you love."},
+{lv:4,ja:"最初の2文（ビーチ旅行＋砂の感触）",en:"One of my happiest childhood memories is a family trip to the beach. I remember the feeling of warm sand under my feet vividly."},
+{lv:4,ja:"最後の2文（特別だった理由＋まとめ）",en:"What made it special was not any exciting activity, but simply being together as a family without any rush or worry. When I think about it now, I realize that the best memories aren't about expensive trips or fancy things - they're about spending quality time with people you love."},
+]},
+{id:30,title:"Fascinating Animal (Dolphins)",full:"An animal that fascinates me is the dolphin. What's amazing about them is their intelligence and social behavior. They are known for living in groups called pods, where they work together and care for each other. Scientists have found that dolphins can recognize themselves in mirrors, which shows they have self-awareness. They also seem to have their own names for each other. Dolphins can solve problems and even appear to play for fun, not just to learn. Their intelligence makes them one of the most interesting animals in the world.",steps:[
+{lv:1,ja:"知性と社会的行動",en:"their intelligence and social behavior"},
+{lv:1,ja:"ポッドと呼ばれるグループで生活する",en:"living in groups called pods"},
+{lv:1,ja:"鏡の中の自分を認識できる",en:"can recognize themselves in mirrors"},
+{lv:1,ja:"自己認識を持つ",en:"they have self-awareness"},
+{lv:2,ja:"私を魅了する動物はイルカだ",en:"An animal that fascinates me is the dolphin."},
+{lv:2,ja:"科学者はイルカが鏡の中の自分を認識できることを発見した",en:"Scientists have found that dolphins can recognize themselves in mirrors, which shows they have self-awareness."},
+{lv:3,ja:"互いに世話をしながら協力して働くポッドと呼ばれるグループで生活する",en:"They are known for living in groups called pods, where they work together and care for each other."},
+{lv:3,ja:"彼らの知性は彼らを世界で最も面白い動物の一つにしている",en:"Their intelligence makes them one of the most interesting animals in the world."},
+{lv:4,ja:"最初の2文（イルカ＋知性と社会的行動）",en:"An animal that fascinates me is the dolphin. What's amazing about them is their intelligence and social behavior."},
+{lv:4,ja:"最後の2文（問題解決＋まとめ）",en:"Dolphins can solve problems and even appear to play for fun, not just to learn. Their intelligence makes them one of the most interesting animals in the world."},
+]},
+{id:31,title:"Daily Routine",full:"My typical day starts early - I wake up at 5 AM to have some quiet time before work. I use this time for personal goals like reading or studying. Then I work from 9 to 5, trying to stay focused and productive. After work, I usually do some household tasks and prepare dinner. I try to balance work responsibilities with personal growth activities. Before bed, I like to watch educational videos on YouTube. It's a relaxing way to end the day while still learning something new.",steps:[
+{lv:1,ja:"仕事前の静かな時間",en:"some quiet time before work"},
+{lv:1,ja:"集中して生産的でいる",en:"stay focused and productive"},
+{lv:1,ja:"仕事の責任と個人の成長活動のバランスを取る",en:"balance work responsibilities with personal growth activities"},
+{lv:1,ja:"何か新しいことを学びながらリラックスする方法",en:"a relaxing way to end the day while still learning something new"},
+{lv:2,ja:"典型的な一日は早く始まる仕事前に静かな時間を持つために朝5時に起きる",en:"My typical day starts early - I wake up at 5 AM to have some quiet time before work."},
+{lv:2,ja:"仕事の責任と個人の成長活動のバランスを取るようにしている",en:"I try to balance work responsibilities with personal growth activities."},
+{lv:3,ja:"就寝前はYouTubeで教育的な動画を見るのが好き",en:"Before bed, I like to watch educational videos on YouTube."},
+{lv:3,ja:"何か新しいことを学びながらリラックスして一日を終える方法",en:"It's a relaxing way to end the day while still learning something new."},
+{lv:4,ja:"最初の2文（一日の始まり＋この時間の使い方）",en:"My typical day starts early - I wake up at 5 AM to have some quiet time before work. I use this time for personal goals like reading or studying."},
+{lv:4,ja:"最後の2文（YouTubeで学ぶ＋まとめ）",en:"Before bed, I like to watch educational videos on YouTube. It's a relaxing way to end the day while still learning something new."},
+]},
+{id:32,title:"Historical Event (Internet)",full:"One of the most important events in history is the creation of the Internet. It changed society by connecting people all over the world instantly. Before the Internet, people had to go to libraries for information or wait days for letters to arrive. Today, we can find almost any information in seconds and communicate with anyone anywhere. It has transformed business, education, and how we maintain relationships. Of course, it also brought new problems like privacy concerns, but overall, the Internet has made knowledge more accessible to everyone.",steps:[
+{lv:1,ja:"インターネットの誕生",en:"the creation of the Internet"},
+{lv:1,ja:"世界中の人々を即座につなぐ",en:"connecting people all over the world instantly"},
+{lv:1,ja:"ビジネス・教育・人間関係を変えた",en:"transformed business, education, and how we maintain relationships"},
+{lv:1,ja:"知識をより多くの人に届ける",en:"made knowledge more accessible to everyone"},
+{lv:2,ja:"歴史上最も重要な出来事の一つはインターネットの誕生だ",en:"One of the most important events in history is the creation of the Internet."},
+{lv:2,ja:"プライバシーの懸念など新しい問題も生んだが全体的に知識をより多くの人に届けた",en:"it also brought new problems like privacy concerns, but overall, the Internet has made knowledge more accessible to everyone."},
+{lv:3,ja:"ビジネス・教育・人間関係の維持方法を変えた",en:"It has transformed business, education, and how we maintain relationships."},
+{lv:4,ja:"最初の2文（インターネットの誕生＋社会への影響）",en:"One of the most important events in history is the creation of the Internet. It changed society by connecting people all over the world instantly."},
+{lv:4,ja:"最後の2文（変革＋まとめ）",en:"It has transformed business, education, and how we maintain relationships. Of course, it also brought new problems like privacy concerns, but overall, the Internet has made knowledge more accessible to everyone."},
+]},
+{id:33,title:"School Memory (First Day)",full:"I clearly remember my first day of elementary school. I was nervous because everything was new - the building, the teachers, and all the other children. I didn't know anyone, and I worried about whether I would make friends. What helped me was meeting another nervous student. We were both shy, but somehow that made it easier to talk to each other. We became good friends that day. Looking back, this experience taught me that showing my true feelings can actually help me connect with others who feel the same way.",steps:[
+{lv:1,ja:"緊張していた",en:"I was nervous"},
+{lv:1,ja:"友達ができるか心配していた",en:"I worried about whether I would make friends"},
+{lv:1,ja:"もう一人の緊張した生徒に会った",en:"meeting another nervous student"},
+{lv:1,ja:"本当の気持ちを見せる",en:"showing my true feelings"},
+{lv:2,ja:"小学校の最初の日を鮮明に覚えている",en:"I clearly remember my first day of elementary school."},
+{lv:2,ja:"二人とも内気だったがそれがお互いに話しやすくした",en:"We were both shy, but somehow that made it easier to talk to each other."},
+{lv:3,ja:"助けになったのは別の緊張した生徒に会ったこと",en:"What helped me was meeting another nervous student."},
+{lv:3,ja:"その日良い友達になった",en:"We became good friends that day."},
+{lv:4,ja:"最初の2文（小学校の初日＋緊張）",en:"I clearly remember my first day of elementary school. I was nervous because everything was new - the building, the teachers, and all the other children."},
+{lv:4,ja:"最後の2文（友達になった＋学んだこと）",en:"We became good friends that day. Looking back, this experience taught me that showing my true feelings can actually help me connect with others who feel the same way."},
+]},
+{id:34,title:"Favorite Music Genre",full:"My favorite type of music is pop. It makes me feel happy and energetic. The catchy melodies and strong beats always lift my mood. I enjoy listening to it when I'm exercising or doing housework - it makes tasks feel easier and more enjoyable. Music has the power to change how we feel instantly. While I appreciate other genres too, pop music is what I turn to most often. It doesn't require deep concentration to enjoy, which makes it perfect for everyday activities.",steps:[
+{lv:1,ja:"キャッチーなメロディーと強いビート",en:"catchy melodies and strong beats"},
+{lv:1,ja:"気分を持ち上げる",en:"lift my mood"},
+{lv:1,ja:"音楽には気持ちを瞬時に変える力がある",en:"Music has the power to change how we feel instantly"},
+{lv:1,ja:"深い集中力を必要としない",en:"doesn't require deep concentration"},
+{lv:2,ja:"好きな音楽はポップだ",en:"My favorite type of music is pop."},
+{lv:2,ja:"キャッチーなメロディーと強いビートはいつも気分を持ち上げる",en:"The catchy melodies and strong beats always lift my mood."},
+{lv:3,ja:"音楽には気持ちを瞬時に変える力がある",en:"Music has the power to change how we feel instantly."},
+{lv:3,ja:"日常活動に最適な深い集中力を必要としない",en:"It doesn't require deep concentration to enjoy, which makes it perfect for everyday activities."},
+{lv:4,ja:"最初の2文（ポップが好き＋キャッチーなメロディー）",en:"My favorite type of music is pop. It makes me feel happy and energetic."},
+{lv:4,ja:"最後の2文（一番聴く＋日常活動に最適）",en:"While I appreciate other genres too, pop music is what I turn to most often. It doesn't require deep concentration to enjoy, which makes it perfect for everyday activities."},
+]},
+{id:35,title:"Technology Impact (Computer)",full:"The technology that has impacted me most is my computer. I use it for work, learning, and entertainment. It has made accessing information much easier - I can watch tutorial videos, take online courses, and research any topic I'm curious about. Without it, I couldn't do my job effectively or continue my education in the way I do now. The computer has become like a window to the world, connecting me to knowledge and people everywhere. It's amazing how one device can serve so many purposes.",steps:[
+{lv:1,ja:"最も影響を与えたテクノロジー",en:"The technology that has impacted me most"},
+{lv:1,ja:"チュートリアル動画を見てオンラインコースを受ける",en:"watch tutorial videos, take online courses"},
+{lv:1,ja:"世界への窓",en:"a window to the world"},
+{lv:1,ja:"一つのデバイスがこれほど多くの目的に役立つ",en:"one device can serve so many purposes"},
+{lv:2,ja:"最も影響を与えたテクノロジーはコンピュータだ",en:"The technology that has impacted me most is my computer."},
+{lv:2,ja:"コンピュータは世界への窓のようになりあらゆる場所の知識と人々とつなげてくれる",en:"The computer has become like a window to the world, connecting me to knowledge and people everywhere."},
+{lv:3,ja:"情報へのアクセスをずっと簡単にした",en:"It has made accessing information much easier"},
+{lv:3,ja:"一つのデバイスがこれほど多くの目的に役立つのは驚きだ",en:"It's amazing how one device can serve so many purposes."},
+{lv:4,ja:"最初の2文（コンピュータ＋使い方）",en:"The technology that has impacted me most is my computer. I use it for work, learning, and entertainment."},
+{lv:4,ja:"最後の2文（世界への窓＋まとめ）",en:"The computer has become like a window to the world, connecting me to knowledge and people everywhere. It's amazing how one device can serve so many purposes."},
+]},
+{id:36,title:"Memorable Dining Experience",full:"A memorable eating experience I had was trying rabbit for the first time in France. I was hesitant at first because in my culture, rabbits are seen more as pets than food. But I decided to try it as part of experiencing French culture. After trying it, I realized it actually tasted quite good - similar to chicken but more tender. This taught me to be more open-minded about food from different cultures. What seems strange to us might be completely normal somewhere else. Traveling and trying new things helps us understand this.",steps:[
+{lv:1,ja:"フランスで初めてウサギを食べた",en:"trying rabbit for the first time in France"},
+{lv:1,ja:"ウサギはペットとして見られる",en:"rabbits are seen more as pets than food"},
+{lv:1,ja:"鶏肉に似ているがより柔らかい",en:"similar to chicken but more tender"},
+{lv:1,ja:"食べ物について心を開く",en:"be more open-minded about food"},
+{lv:2,ja:"忘れられない食体験はフランスで初めてウサギを食べたことだった",en:"A memorable eating experience I had was trying rabbit for the first time in France."},
+{lv:2,ja:"これが異なる文化の食べ物についてより心を開くように教えてくれた",en:"This taught me to be more open-minded about food from different cultures."},
+{lv:3,ja:"私たちに奇妙に見えるものが他の場所では完全に普通かもしれない",en:"What seems strange to us might be completely normal somewhere else."},
+{lv:3,ja:"旅行して新しいことを試すことでこれを理解できる",en:"Traveling and trying new things helps us understand this."},
+{lv:4,ja:"最初の2文（ウサギを食べた＋最初の躊躇）",en:"A memorable eating experience I had was trying rabbit for the first time in France. I was hesitant at first because in my culture, rabbits are seen more as pets than food."},
+{lv:4,ja:"最後の2文（奇妙なものが普通かも＋旅行の価値）",en:"What seems strange to us might be completely normal somewhere else. Traveling and trying new things helps us understand this."},
+]},
+{id:37,title:"Importance of Communication",full:"Communication is essential because it's how we share ideas, solve problems, and build relationships. Technology has made it easier to stay in touch with people far away through messages and video calls. However, we should remember that face-to-face conversation is still very important. When we meet in person, we can see facial expressions and body language, which helps us understand each other better. Good communication requires both speaking clearly and listening carefully. In today's world, we need to balance online and in-person communication.",steps:[
+{lv:1,ja:"アイデアを共有し問題を解決し関係を築く",en:"share ideas, solve problems, and build relationships"},
+{lv:1,ja:"対面での会話",en:"face-to-face conversation"},
+{lv:1,ja:"表情とボディランゲージ",en:"facial expressions and body language"},
+{lv:1,ja:"オンラインと対面でのコミュニケーションのバランス",en:"balance online and in-person communication"},
+{lv:2,ja:"コミュニケーションは不可欠アイデアを共有し問題を解決し関係を築く方法だから",en:"Communication is essential because it's how we share ideas, solve problems, and build relationships."},
+{lv:2,ja:"対面で会うとき表情とボディランゲージを見ることでお互いをよりよく理解できる",en:"When we meet in person, we can see facial expressions and body language, which helps us understand each other better."},
+{lv:3,ja:"テクノロジーはメッセージやビデオ通話で遠くの人と連絡を取りやすくした",en:"Technology has made it easier to stay in touch with people far away through messages and video calls."},
+{lv:3,ja:"今日の世界ではオンラインと対面でのコミュニケーションのバランスが必要",en:"In today's world, we need to balance online and in-person communication."},
+{lv:4,ja:"最初の2文（コミュニケーションの重要性＋テクノロジーの役割）",en:"Communication is essential because it's how we share ideas, solve problems, and build relationships. Technology has made it easier to stay in touch with people far away through messages and video calls."},
+{lv:4,ja:"最後の2文（話す＋聞く＋バランス）",en:"Good communication requires both speaking clearly and listening carefully. In today's world, we need to balance online and in-person communication."},
+]},
+{id:38,title:"School Memory (Friends)",full:"A school memory I treasure is spending time with friends after class. We spent time singing karaoke and walking along the river, talking about our dreams and worries. What made it memorable was the feeling of freedom and connection - we could be ourselves completely without any judgment. We laughed, shared secrets, and supported each other. These moments remind me that simple times with good friends are often the happiest. Now that I'm older and busier, I appreciate those carefree days even more.",steps:[
+{lv:1,ja:"カラオケをして川沿いを歩いた",en:"singing karaoke and walking along the river"},
+{lv:1,ja:"夢と心配について話した",en:"talking about our dreams and worries"},
+{lv:1,ja:"全く判断されずに自分らしくいられた",en:"be ourselves completely without any judgment"},
+{lv:1,ja:"のんびりした日々",en:"those carefree days"},
+{lv:2,ja:"大切にしている学校の思い出は放課後に友人と過ごした時間だ",en:"A school memory I treasure is spending time with friends after class."},
+{lv:2,ja:"笑い秘密を共有しお互いをサポートした",en:"We laughed, shared secrets, and supported each other."},
+{lv:3,ja:"良い友人との単純な時間がしばしば最も幸せだと思い出させてくれる",en:"These moments remind me that simple times with good friends are often the happiest."},
+{lv:3,ja:"年を取って忙しくなった今あののんびりした日々をさらに大切に思う",en:"Now that I'm older and busier, I appreciate those carefree days even more."},
+{lv:4,ja:"最初の2文（友人との時間＋カラオケと川）",en:"A school memory I treasure is spending time with friends after class. We spent time singing karaoke and walking along the river, talking about our dreams and worries."},
+{lv:4,ja:"最後の2文（単純な時間の幸せ＋今の気持ち）",en:"These moments remind me that simple times with good friends are often the happiest. Now that I'm older and busier, I appreciate those carefree days even more."},
+]},
+{id:39,title:"Inspiring Book (The Little Prince)",full:"A book that changed my perspective is The Little Prince. Although it's written for children, its messages are very deep. The most important message is that what really matters in life is invisible - things like love, friendship, and the time we invest in relationships. It taught me that a relationship becomes special not because of what someone is, but because of the care and attention we give to them. I often think about this when I'm too focused on work or material things. The book reminds me to treasure the people in my life.",steps:[
+{lv:1,ja:"人生で本当に大切なものは目に見えない",en:"what really matters in life is invisible"},
+{lv:1,ja:"愛・友情・人間関係に投資する時間",en:"love, friendship, and the time we invest in relationships"},
+{lv:1,ja:"気遣いと注意を払うから関係は特別になる",en:"because of the care and attention we give to them"},
+{lv:1,ja:"人生の人々を大切にする",en:"treasure the people in my life"},
+{lv:2,ja:"自分の視点を変えた本は星の王子さまだ",en:"A book that changed my perspective is The Little Prince."},
+{lv:2,ja:"最も重要なメッセージは人生で本当に大切なものは目に見えないということ",en:"The most important message is that what really matters in life is invisible - things like love, friendship, and the time we invest in relationships."},
+{lv:3,ja:"子供向けに書かれているがメッセージはとても深い",en:"Although it's written for children, its messages are very deep."},
+{lv:3,ja:"この本は人生の人々を大切にすることを思い出させてくれる",en:"The book reminds me to treasure the people in my life."},
+{lv:4,ja:"最初の2文（視点を変えた本＋子供向けだが深い）",en:"A book that changed my perspective is The Little Prince. Although it's written for children, its messages are very deep."},
+{lv:4,ja:"最後の2文（仕事に集中しすぎているとき＋まとめ）",en:"I often think about this when I'm too focused on work or material things. The book reminds me to treasure the people in my life."},
+]},
+{id:40,title:"Influential Teacher",full:"A person who influenced me greatly is one of my teachers. He encouraged me to never give up on my dreams, especially when I was going through a hard time. What I learned from him was that our current situation doesn't determine our future - we can always grow and improve with effort. He believed in me even when I didn't believe in myself. Thanks to him, I kept going and eventually found my own path. His faith in me changed how I see my own potential.",steps:[
+{lv:1,ja:"夢を諦めないように励ました",en:"encouraged me to never give up on my dreams"},
+{lv:1,ja:"現在の状況は将来を決定しない",en:"our current situation doesn't determine our future"},
+{lv:1,ja:"自分を信じていないときでも信じてくれた",en:"believed in me even when I didn't believe in myself"},
+{lv:1,ja:"自分の可能性への見方を変えた",en:"changed how I see my own potential"},
+{lv:2,ja:"大きく影響を与えた人は私の先生の一人だ",en:"A person who influenced me greatly is one of my teachers."},
+{lv:2,ja:"現在の状況は将来を決定しない努力でいつでも成長し改善できると学んだ",en:"our current situation doesn't determine our future - we can always grow and improve with effort."},
+{lv:3,ja:"大変な時期を乗り越えているときに特に夢を諦めないように励ましてくれた",en:"He encouraged me to never give up on my dreams, especially when I was going through a hard time."},
+{lv:3,ja:"彼の私への信頼が自分の可能性への見方を変えた",en:"His faith in me changed how I see my own potential."},
+{lv:4,ja:"最初の2文（影響を受けた先生＋夢を諦めないように）",en:"A person who influenced me greatly is one of my teachers. He encouraged me to never give up on my dreams, especially when I was going through a hard time."},
+{lv:4,ja:"最後の2文（自分の道を見つけた＋可能性への見方）",en:"Thanks to him, I kept going and eventually found my own path. His faith in me changed how I see my own potential."},
+]},
 ];
 
-function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-function firstSentence(text) { const s = text.indexOf(". "); return s===-1 ? text : text.slice(0, s+1); }
-const MODES = { HOME:"home", FLASHCARD:"flashcard", QUIZ:"quiz", RESULTS:"results" };
+const LV={
+1:{label:"Lv.1 キーワード",bg:"#dbeafe",border:"#3b82f6",text:"#1e40af",dot:"#3b82f6"},
+2:{label:"Lv.2 フレーズ",bg:"#dcfce7",border:"#22c55e",text:"#15803d",dot:"#22c55e"},
+3:{label:"Lv.3 1文",bg:"#fef9c3",border:"#eab308",text:"#854d0e",dot:"#eab308"},
+4:{label:"Lv.4 仕上げ",bg:"#fce7f3",border:"#ec4899",text:"#9d174d",dot:"#ec4899"},
+};
 
-function useTTS() {
-  const [speaking, setSpeaking] = useState(false);
-  const rateRef = useRef(0.88);
-  const speak = useCallback((text) => {
-    if (!window.speechSynthesis) return;
+function norm(s){return s.trim().replace(/\s+/g," ").toLowerCase().replace(/['']/g,"'");}
+
+function useTTS(){
+  const speak=(text,rate=0.88)=>{
+    if(!window.speechSynthesis)return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = "en-US"; utt.rate = rateRef.current; utt.pitch = 1.0;
-    const voices = window.speechSynthesis.getVoices();
-    const v = voices.find(v => v.lang.startsWith("en") && /samantha|karen|victoria|moira|fiona|zira|jenny/i.test(v.name))
-      || voices.find(v => v.lang.startsWith("en-US"))
-      || voices.find(v => v.lang.startsWith("en"));
-    if (v) utt.voice = v;
-    utt.onstart = () => setSpeaking(true);
-    utt.onend = () => setSpeaking(false);
-    utt.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(utt);
-  }, []);
-  const stop = useCallback(() => { window.speechSynthesis && window.speechSynthesis.cancel(); setSpeaking(false); }, []);
-  useEffect(() => () => window.speechSynthesis && window.speechSynthesis.cancel(), []);
-  return { speak, stop, speaking, rateRef };
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US";u.rate=rate;
+    const vs=window.speechSynthesis.getVoices();
+    const v=vs.find(v=>/samantha|karen|victoria|moira/i.test(v.name)&&v.lang.startsWith("en"))||vs.find(v=>v.lang.startsWith("en-US"))||vs.find(v=>v.lang.startsWith("en"));
+    if(v)u.voice=v;
+    window.speechSynthesis.speak(u);
+  };
+  return{speak};
 }
 
-function App() {
-  const [mode, setMode] = useState(MODES.HOME);
-  const [deck, setDeck] = useState([]);
-  const [idx, setIdx] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [scores, setScores] = useState({});
-  const [quizOrder, setQuizOrder] = useState([]);
-  const [options, setOptions] = useState([]);
-  const [quizAnswered, setQuizAnswered] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [speed, setSpeed] = useState(0.88);
-  const { speak, stop, speaking, rateRef } = useTTS();
+function bs(bg,extra){return{background:bg,color:"white",border:"none",borderRadius:14,padding:"14px 16px",width:"100%",fontFamily:"'Nunito',sans-serif",fontSize:14,fontWeight:800,cursor:"pointer",...extra};}
 
-  useEffect(() => { rateRef.current = speed; }, [speed]);
+function App(){
+  const[screen,setScreen]=useState("home");
+  const[topicId,setTopicId]=useState(null);
+  const[stepIdx,setStepIdx]=useState(0);
+  const[cleared,setCleared]=useState({});
+  const{speak}=useTTS();
+  const topic=TOPICS.find(t=>t.id===topicId);
+  const tc=(id)=>(cleared[id]||[]).length;
+  const tt=(id)=>TOPICS.find(t=>t.id===id).steps.length;
+  const mark=(tId,sIdx)=>setCleared(p=>{const a=p[tId]||[];if(a.includes(sIdx))return p;return{...p,[tId]:[...a,sIdx]};});
 
-  const known = Object.entries(scores).filter(([,v])=>v==="known").map(([k])=>+k);
-  const unknown = Object.entries(scores).filter(([,v])=>v==="unknown").map(([k])=>+k);
-
-  const startFC = (filter) => {
-    stop();
-    const d = filter==="unknown" ? topics.filter(t=>!known.includes(t.id)) : topics;
-    setDeck(shuffle(d)); setIdx(0); setFlipped(false); setMode(MODES.FLASHCARD);
-  };
-
-  const startQuiz = () => {
-    stop();
-    setQuizOrder(shuffle(topics)); setIdx(0); setQuizAnswered(false); setSelected(null); setMode(MODES.QUIZ);
-  };
-
-  useEffect(() => {
-    if (mode===MODES.QUIZ && quizOrder.length>0) {
-      const c = quizOrder[idx];
-      setOptions(shuffle([c, ...shuffle(topics.filter(t=>t.id!==c.id)).slice(0,3)]));
-    }
-  }, [mode, quizOrder, idx]);
-
-  const card = deck[idx];
-  const quiz = quizOrder[idx];
-
-  const handleFC = (res) => {
-    stop();
-    setScores(p=>({...p,[card.id]:res}));
-    if (idx+1>=deck.length) setMode(MODES.RESULTS);
-    else { setIdx(i=>i+1); setFlipped(false); }
-  };
-
-  const handleQuizAnswer = (opt) => {
-    setSelected(opt); setQuizAnswered(true);
-    setScores(p=>({...p,[quiz.id]: opt.id===quiz.id?"known":"unknown"}));
-    if (opt.id===quiz.id) speak(quiz.text);
-  };
-
-  const nextQuiz = () => {
-    stop();
-    if (idx+1>=quizOrder.length) setMode(MODES.RESULTS);
-    else { setIdx(i=>i+1); setQuizAnswered(false); setSelected(null); }
-  };
-
-  const knownCt = known.length, unknownCt = unknown.length;
-  const answered = Object.keys(scores).length;
-  const pct = answered>0 ? Math.round((knownCt/answered)*100) : 0;
-  const fcProg = deck.length>0 ? (idx/deck.length)*100 : 0;
-  const qProg = quizOrder.length>0 ? (idx/quizOrder.length)*100 : 0;
-
-  const SpeedBar = () => (
-    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-      <span style={{fontSize:11,color:"#94a3b8",fontWeight:700,flexShrink:0}}>スピード</span>
-      {[["🐢 遅い",0.7],["🐇 普通",0.88],["⚡ 速い",1.1]].map(([l,v])=>(
-        <button key={v} onClick={()=>setSpeed(v)} className={"speed-btn"+(speed===v?" active":"")}>{l}</button>
-      ))}
-    </div>
-  );
-
-  const TopBar = ({prog,cur,tot}) => (
-    <div style={{display:"flex",alignItems:"center",gap:12,paddingBottom:8}}>
-      <button onClick={()=>{stop();setMode(MODES.HOME);}} style={{background:"white",border:"none",borderRadius:12,width:40,height:40,fontSize:18,cursor:"pointer",boxShadow:"0 1px 6px rgba(0,0,0,0.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>←</button>
-      <div style={{flex:1}}>
-        <div style={{background:"#e2e8f0",height:6,borderRadius:6,overflow:"hidden",marginBottom:4}}>
-          <div className="topbar-fill" style={{width:`${prog}%`}} />
+  if(screen==="home"){
+    const ts=TOPICS.reduce((s,t)=>s+t.steps.length,0);
+    const ds=Object.values(cleared).flat().length;
+    const pct=Math.round((ds/ts)*100);
+    return(
+      <div className="shell">
+        <div style={{background:"#1e293b",padding:"18px 16px 14px",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <span style={{fontSize:28}}>⌨️</span>
+            <div>
+              <h1 style={{fontSize:18,fontWeight:800,color:"white"}}>Phrase Typing Practice</h1>
+              <p style={{fontSize:11,color:"#94a3b8",fontWeight:600}}>40 Topics · Eiken Pre-1</p>
+            </div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:12}}>
+            <div style={{flex:1}}>
+              <div style={{background:"rgba(255,255,255,0.15)",height:6,borderRadius:6,overflow:"hidden"}}>
+                <div style={{height:"100%",background:"linear-gradient(90deg,#6366f1,#ec4899)",width:`${pct}%`,transition:"width 0.5s"}}/>
+              </div>
+              <p style={{fontSize:11,color:"#94a3b8",marginTop:4,fontWeight:600}}>{ds}/{ts} フレーズ完了</p>
+            </div>
+            <div style={{fontSize:22,fontWeight:800,color:"white"}}>{pct}%</div>
+          </div>
         </div>
-        <span style={{fontSize:11,color:"#94a3b8",fontWeight:700}}>{cur} / {tot}</span>
+        <div style={{flex:1,overflowY:"auto",padding:"12px 12px 40px"}}>
+          {TOPICS.map(t=>{
+            const done=tc(t.id),total=tt(t.id),p2=Math.round((done/total)*100),fin=done===total;
+            return(
+              <button key={t.id} onClick={()=>{setTopicId(t.id);setStepIdx(0);setScreen("practice");}} style={{
+                background:fin?"#f0fdf4":"white",border:`2px solid ${fin?"#86efac":"#e2e8f0"}`,
+                borderRadius:14,padding:"12px 14px",display:"flex",alignItems:"center",gap:10,
+                cursor:"pointer",textAlign:"left",width:"100%",marginBottom:8,boxShadow:"0 1px 4px rgba(0,0,0,0.05)"
+              }}>
+                <div style={{width:32,height:32,borderRadius:8,background:fin?"#22c55e":"#f1f5f9",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{fontSize:fin?14:12,fontWeight:800,color:fin?"white":"#94a3b8"}}>{fin?"✓":t.id}</span>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <p style={{fontSize:13,fontWeight:800,color:"#0f172a",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",marginBottom:4}}>{t.title}</p>
+                  <div style={{background:"#e2e8f0",height:4,borderRadius:4,overflow:"hidden"}}>
+                    <div style={{height:"100%",background:fin?"#22c55e":"linear-gradient(90deg,#6366f1,#8b5cf6)",width:`${p2}%`,transition:"width 0.3s"}}/>
+                  </div>
+                </div>
+                <span style={{fontSize:11,fontWeight:700,color:"#94a3b8",flexShrink:0}}>{done}/{total}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if(screen==="practice"&&topic){
+    return <Practice topic={topic} stepIdx={stepIdx} setStepIdx={setStepIdx} cleared={cleared[topic.id]||[]} onClear={(i)=>mark(topic.id,i)} onBack={()=>setScreen("home")} speak={speak}/>;
+  }
+  return null;
+}
+
+function Practice({topic,stepIdx,setStepIdx,cleared,onClear,onBack,speak}){
+  const[input,setInput]=useState("");
+  const[status,setStatus]=useState("idle");
+  const[showAns,setShowAns]=useState(false);
+  const ref=useRef(null);
+  const step=topic.steps[stepIdx];
+  const lv=LV[step.lv];
+  const isLast=stepIdx===topic.steps.length-1;
+
+  useEffect(()=>{setInput("");setStatus("idle");setShowAns(false);setTimeout(()=>ref.current?.focus(),80);},[stepIdx]);
+
+  const check=()=>{
+    if(norm(input)===norm(step.en)){setStatus("correct");onClear(stepIdx);speak(step.en);}
+    else setStatus("wrong");
+  };
+  const next=()=>{if(!isLast)setStepIdx(i=>i+1);};
+
+  const prog=Math.round((cleared.length/topic.steps.length)*100);
+
+  return(
+    <div className="shell">
+      <div style={{background:"#1e293b",padding:"12px 14px 10px",flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+          <button onClick={onBack} style={{background:"rgba(255,255,255,0.1)",border:"none",borderRadius:8,width:32,height:32,color:"white",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>←</button>
+          <div style={{flex:1,minWidth:0}}>
+            <p style={{fontSize:12,fontWeight:800,color:"white",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{topic.title}</p>
+            <p style={{fontSize:10,color:"#94a3b8"}}>{cleared.length}/{topic.steps.length} クリア · {prog}%</p>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
+          {topic.steps.map((s,i)=>{
+            const cur=i===stepIdx,done=cleared.includes(i);
+            return<div key={i} onClick={()=>setStepIdx(i)} style={{height:5,flex:"1 1 16px",maxWidth:28,borderRadius:3,cursor:"pointer",background:done?"#22c55e":cur?LV[s.lv].dot:"#334155",border:cur?`1.5px solid ${LV[s.lv].dot}`:"1.5px solid transparent"}}/>;
+          })}
+        </div>
+      </div>
+
+      <div style={{flex:1,overflowY:"auto",padding:"14px 14px 32px",display:"flex",flexDirection:"column",gap:10}}>
+        <div style={{display:"inline-flex",alignSelf:"flex-start",background:lv.bg,border:`1.5px solid ${lv.border}`,borderRadius:8,padding:"3px 10px"}}>
+          <span style={{fontSize:11,fontWeight:800,color:lv.text}}>{lv.label} · {stepIdx+1}/{topic.steps.length}</span>
+        </div>
+
+        <div style={{background:"white",borderRadius:18,padding:"18px 16px",boxShadow:"0 2px 8px rgba(0,0,0,0.07)"}}>
+          <p style={{fontSize:10,color:"#94a3b8",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:7}}>🇯🇵 日本語ヒント</p>
+          <p style={{fontSize:20,fontWeight:800,color:"#0f172a",lineHeight:1.4}}>{step.ja}</p>
+        </div>
+
+        <div style={{background:"white",borderRadius:18,padding:"14px 16px",boxShadow:"0 2px 8px rgba(0,0,0,0.07)"}}>
+          <p style={{fontSize:10,color:"#94a3b8",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>🇬🇧 英語でタイプ</p>
+          <textarea ref={ref} value={input} onChange={e=>{setInput(e.target.value);setStatus("idle");}}
+            onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();status==="correct"?next():check();}}}
+            placeholder="ここに英語を入力..." disabled={status==="correct"} rows={3}
+            style={{width:"100%",border:`2px solid ${status==="correct"?"#22c55e":status==="wrong"?"#ef4444":"#e2e8f0"}`,borderRadius:10,padding:"10px 12px",fontSize:15,fontFamily:"'Nunito',sans-serif",fontWeight:700,color:"#0f172a",resize:"none",outline:"none",background:status==="correct"?"#f0fdf4":status==="wrong"?"#fef2f2":"white"}}
+          />
+          {status==="wrong"&&input&&(
+            <div style={{fontSize:12,marginTop:5,fontFamily:"monospace",lineHeight:1.8,wordBreak:"break-all"}}>
+              {input.split("").map((c,i)=><span key={i} style={{color:c.toLowerCase()===step.en[i]?.toLowerCase()?"#16a34a":"#dc2626",fontWeight:700}}>{c}</span>)}
+            </div>
+          )}
+        </div>
+
+        {showAns&&status!=="correct"&&(
+          <div style={{background:"#fefce8",border:"1.5px solid #eab308",borderRadius:14,padding:"10px 14px"}}>
+            <p style={{fontSize:10,color:"#854d0e",fontWeight:700,marginBottom:4}}>✅ 正解</p>
+            <p style={{fontSize:14,fontWeight:800,color:"#78350f",fontFamily:"monospace",lineHeight:1.7,wordBreak:"break-all"}}>{step.en}</p>
+          </div>
+        )}
+
+        {status==="correct"&&<div style={{background:"#f0fdf4",border:"1.5px solid #22c55e",borderRadius:14,padding:"10px 16px",textAlign:"center"}}><p style={{fontSize:16,fontWeight:800,color:"#15803d"}}>✓ 正解！🎉</p></div>}
+        {status==="wrong"&&<div style={{background:"#fef2f2",border:"1.5px solid #ef4444",borderRadius:14,padding:"8px 16px",textAlign:"center"}}><p style={{fontSize:13,fontWeight:800,color:"#dc2626"}}>✗ もう一度！大文字・ピリオドも確認</p></div>}
+
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:2}}>
+          {status==="correct"?(
+            isLast?<button onClick={onBack} style={bs("#6366f1")}>🏆 トピック完了！ホームへ</button>
+                  :<button onClick={next} style={bs("#6366f1")}>次のフレーズへ → (Enter)</button>
+          ):(
+            <button onClick={check} style={bs("#0f172a")}>✓ 答え合わせ (Enter)</button>
+          )}
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>speak(step.en,0.78)} style={{...bs("#0f766e",{flex:1,padding:"11px 6px",fontSize:12})}}>🔊 ゆっくり</button>
+            <button onClick={()=>speak(step.en,1.0)} style={{...bs("#0369a1",{flex:1,padding:"11px 6px",fontSize:12})}}>🔊 普通</button>
+            <button onClick={()=>setShowAns(s=>!s)} style={{...bs("#64748b",{flex:1,padding:"11px 6px",fontSize:11})}}>{showAns?"隠す":"答え見る"}</button>
+          </div>
+        </div>
+
+        <details style={{background:"#f8fafc",borderRadius:12,padding:"10px 14px",border:"1px solid #e2e8f0"}}>
+          <summary style={{fontSize:11,color:"#64748b",fontWeight:700,cursor:"pointer",userSelect:"none"}}>📝 スピーチ全文を見る</summary>
+          <p style={{fontSize:12,color:"#475569",lineHeight:1.85,marginTop:8,fontWeight:600}}>{topic.full}</p>
+          <button onClick={()=>speak(topic.full,0.85)} style={{...bs("#334155",{marginTop:8,fontSize:12,padding:"9px"})}}>🔊 全文を聞く</button>
+        </details>
       </div>
     </div>
   );
-
-  return (
-    <div className="shell">
-      {mode===MODES.HOME && (
-        <div className="page">
-          <div style={{textAlign:"center",padding:"28px 0 12px"}}>
-            <div style={{fontSize:52,marginBottom:8}}>🎙️</div>
-            <h1 style={{fontSize:26,fontWeight:800,color:"#0f172a"}}>Speaking Practice</h1>
-            <p style={{fontSize:13,color:"#94a3b8",marginTop:4,fontWeight:600}}>40 Topics · Eiken Pre-1</p>
-          </div>
-          <div className="stat-row">
-            {[[topics.length,"全トピック","#4a5568"],[knownCt,"覚えた ✓","#16a34a"],[unknownCt,"要復習","#dc2626"]].map(([n,l,c])=>(
-              <div key={l} className="stat-card">
-                <div style={{fontSize:30,fontWeight:800,color:c}}>{n}</div>
-                <div style={{fontSize:11,color:"#94a3b8",fontWeight:700,marginTop:3}}>{l}</div>
-              </div>
-            ))}
-          </div>
-          <p style={{fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>フラッシュカード</p>
-          <BigBtn icon="🃏" label="全て練習する" sub="40トピック全部" bg="#1e293b" onClick={()=>startFC("all")} />
-          {unknownCt>0 && <BigBtn icon="🔁" label={`苦手だけ (${unknownCt}件)`} sub="まだ覚えていないものを集中練習" bg="#b91c1c" onClick={()=>startFC("unknown")} />}
-          <p style={{fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1,marginTop:8}}>クイズモード</p>
-          <BigBtn icon="❓" label="4択クイズ" sub="最初の1文からトピックを当てる" bg="#0f766e" onClick={startQuiz} />
-          {knownCt>0 && <button className="ghost-btn" onClick={()=>setScores({})}>🔄 記録をリセット</button>}
-        </div>
-      )}
-
-      {mode===MODES.FLASHCARD && card && (
-        <div className="page">
-          <TopBar prog={fcProg} cur={idx+1} tot={deck.length} />
-          <SpeedBar />
-          <div className="fc-card" onClick={()=>!flipped && setFlipped(true)}>
-            {!flipped ? (
-              <div className="fc-front">
-                <div className="fc-num">Topic #{card.id}</div>
-                <div className="fc-title">{card.title}</div>
-                <div className="fc-hint">声に出して話したら、タップ →</div>
-              </div>
-            ) : (
-              <div className="fc-back">
-                <div style={{fontSize:11,color:"#6366f1",fontWeight:700,marginBottom:10,textTransform:"uppercase",letterSpacing:1}}>{card.title}</div>
-                <p className="fc-text">{card.text}</p>
-              </div>
-            )}
-          </div>
-          <div className="tts-row">
-            <button className="tts-btn" onClick={()=>speak(firstSentence(card.text))}>▶ 最初の1文</button>
-            <button className="tts-btn tts-primary" onClick={()=>speak(card.text)}>{speaking?"🔊 再生中":"▶ 全文を読む"}</button>
-            <button className="tts-btn tts-stop" onClick={stop}>⏹</button>
-          </div>
-          {flipped ? (
-            <div className="score-row">
-              <button className="score-btn bad" onClick={()=>handleFC("unknown")}>😓 もう一度</button>
-              <button className="score-btn good" onClick={()=>handleFC("known")}>✓ 覚えた！</button>
-            </div>
-          ) : (
-            <p style={{textAlign:"center",fontSize:12,color:"#94a3b8",fontWeight:600}}>答えを確認したら「覚えた」か「もう一度」を選んでください</p>
-          )}
-        </div>
-      )}
-
-      {mode===MODES.QUIZ && quiz && (
-        <div className="page">
-          <TopBar prog={qProg} cur={idx+1} tot={quizOrder.length} />
-          <SpeedBar />
-          <div className="quiz-q-box">
-            <p style={{fontSize:10,color:"#94a3b8",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>このスピーチはどのトピック？</p>
-            <p className="quiz-q-text">"{firstSentence(quiz.text)}"</p>
-            <div className="tts-row" style={{marginTop:12}}>
-              <button className="tts-btn tts-primary" onClick={()=>speak(quiz.text)}>{speaking?"🔊 再生中":"▶ 全文を聞く"}</button>
-              <button className="tts-btn tts-stop" onClick={stop}>⏹</button>
-            </div>
-          </div>
-          <div>
-            {options.map(opt=>{
-              let cls="quiz-opt";
-              if(quizAnswered){ if(opt.id===quiz.id) cls+=" correct"; else if(opt.id===selected?.id) cls+=" wrong"; }
-              return <button key={opt.id} className={cls} onClick={()=>!quizAnswered&&handleQuizAnswer(opt)}>{opt.title}</button>;
-            })}
-          </div>
-          {quizAnswered && (
-            <>
-              <div className={"quiz-result "+(selected?.id===quiz.id?"ok":"ng")}>
-                {selected?.id===quiz.id?"✓ 正解！":`✗ 正解は「${quiz.title}」`}
-              </div>
-              <button className="next-btn" onClick={nextQuiz}>
-                {idx+1>=quizOrder.length?"結果を見る →":"次の問題 →"}
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {mode===MODES.RESULTS && (
-        <div className="page" style={{alignItems:"center"}}>
-          <div style={{textAlign:"center",padding:"28px 0 16px"}}>
-            <div className="pct-circle">
-              <span style={{fontSize:36,fontWeight:800,color:"white"}}>{pct}%</span>
-              <span style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontWeight:700}}>正解率</span>
-            </div>
-            <h2 style={{fontSize:26,fontWeight:800,color:"#1e293b",marginTop:16}}>
-              {pct>=80?"すごい！🎉":pct>=50?"よく頑張りました！":"もう少し！💪"}
-            </h2>
-            <p style={{fontSize:14,color:"#94a3b8",fontWeight:700,marginTop:6}}>覚えた {knownCt}件 ／ 要復習 {unknownCt}件</p>
-          </div>
-          <div style={{width:"100%",display:"flex",flexDirection:"column",gap:10}}>
-            {unknownCt>0 && <BigBtn icon="🔁" label={`苦手を再練習 (${unknownCt}件)`} bg="#b91c1c" onClick={()=>startFC("unknown")} />}
-            <BigBtn icon="❓" label="クイズをもう一度" bg="#0f766e" onClick={startQuiz} />
-            <BigBtn icon="🏠" label="ホームへ" bg="#1e293b" onClick={()=>setMode(MODES.HOME)} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
-function BigBtn({icon,label,sub,bg,onClick}) {
-  return (
-    <button onClick={onClick} style={{width:"100%",background:bg,border:"none",borderRadius:18,padding:"16px 18px",display:"flex",alignItems:"center",gap:14,cursor:"pointer",color:"white",boxShadow:"0 4px 14px rgba(0,0,0,0.2)",marginBottom:2}}>
-      <span style={{fontSize:24,flexShrink:0}}>{icon}</span>
-      <span style={{display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
-        <span style={{fontSize:16,fontWeight:800,fontFamily:"Nunito,sans-serif"}}>{label}</span>
-        {sub && <span style={{fontSize:12,opacity:0.7,marginTop:2,fontFamily:"Nunito,sans-serif"}}>{sub}</span>}
-      </span>
-    </button>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
